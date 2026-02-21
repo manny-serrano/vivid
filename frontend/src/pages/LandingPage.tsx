@@ -16,7 +16,7 @@ const DEMO_MARCUS = [
   { subject: 'Discipline', score: 88, fullMark: 100 },
   { subject: 'Debt', score: 85, fullMark: 100 },
   { subject: 'Resilience', score: 68, fullMark: 100 },
-  { subject: 'Growthx', score: 70, fullMark: 100 },
+  { subject: 'Growth', score: 70, fullMark: 100 },
 ];
 
 const DEMO_SARAH = [
