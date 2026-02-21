@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String       @id @default(cuid())
+  firebaseUid         String       @unique
+  email               String       @unique
+  firstName           String
+  lastName            String
+  hasPlaidConnection  Boolean      @default(false)
+  encryptedPlaidToken String?
+  plaidItemId         String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  twin                Twin?
+  shareTokens         ShareToken[]
+
+  @@map("users")
+}
+
+model Twin {
+  id                       String       @id @default(cuid())
+  userId                   String       @unique
+  user                     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  incomeStabilityScore     Float
+  spendingDisciplineScore  Float
+  debtTrajectoryScore      Float
+  financialResilienceScore Float
+  growthMomentumScore      Float
+  overallScore             Float
+
+  consumerNarrative        String       @db.Text
+  institutionNarrative     String       @db.Text
+
+  personalLoanReadiness    Float
+  autoLoanReadiness        Float
+  mortgageReadiness        Float
+  smallBizReadiness        Float
+
+  profileHash              String
+  hederaTopicId            String
+  hederaTransactionId      String?
+  hederaTimestamp           DateTime?
+  blockchainVerified       Boolean      @default(false)
+
+  generatedAt              DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+  transactionCount         Int
+  analysisMonths           Int
+
+  transactions             Transaction[]
+  shareTokens              ShareToken[]
+
+  @@map("twins")
+}
+
+model Transaction {
+  id                 String   @id @default(cuid())
+  twinId             String
+  twin               Twin     @relation(fields: [twinId], references: [id], onDelete: Cascade)
+  userId             String
+  plaidTransactionId String   @unique
+  amount             Float
+  date               DateTime
+  merchantName       String?
+  originalCategory   String[]
+  vividCategory      String
+  isBusinessExpense  Boolean  @default(false)
+  isRecurring        Boolean  @default(false)
+  isIncomeDeposit    Boolean  @default(false)
+  confidenceScore    Float
+  createdAt          DateTime @default(now())
+
+  @@index([twinId])
+  @@index([userId])
+  @@index([date])
+  @@map("transactions")
+}
+
+model ShareToken {
+  id                     String    @id @default(cuid())
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twinId                 String
+  twin                   Twin      @relation(fields: [twinId], references: [id], onDelete: Cascade)
+  token                  String    @unique @default(uuid())
+
+  recipientEmail         String?
+  recipientInstitution   String?
+  recipientName          String?
+
+  showOverallScore       Boolean   @default(true)
+  showDimensionScores    Boolean   @default(true)
+  showNarrative          Boolean   @default(true)
+  showTimeline           Boolean   @default(false)
+  showTransactions       Boolean   @default(false)
+  showLendingReadiness   Boolean   @default(true)
+  showBlockchainProof    Boolean   @default(true)
+
+  expiresAt              DateTime?
+  revokedAt              DateTime?
+  accessCount            Int       @default(0)
+  lastAccessedAt         DateTime?
+  createdAt              DateTime  @default(now())
+
+  @@index([token])
+  @@index([userId])
+  @@map("share_tokens")
+}
+
+model Institution {
+  id          String          @id @default(cuid())
+  name        String
+  type        InstitutionType
+  email       String          @unique
+  firebaseUid String          @unique
+  logoUrl     String?
+  createdAt   DateTime        @default(now())
+
+  @@map("institutions")
+}
+
+enum InstitutionType {
+  CREDIT_UNION
+  COMMUNITY_BANK
+  OTHER
+}
