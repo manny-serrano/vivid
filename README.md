@@ -227,8 +227,7 @@ Built for **LIVE AI Ivy Plus 2026**. Main sponsor: **BankSocial** — a blockcha
 
 ## Team
 
-*Your team name and links here.*
-
+Manny Serrano and Kevin Benitez 
 ---
 
 ## License
