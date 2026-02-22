@@ -95,10 +95,10 @@ export function LandingPage() {
           className="relative mt-10 flex gap-4 justify-center"
         >
           <Link to="/onboarding">
-            <Button>Build your twin</Button>
+            <Button>Get started</Button>
           </Link>
-          <Link to="/dashboard">
-            <Button variant="secondary">View demo</Button>
+          <Link to="/login">
+            <Button variant="secondary">Log in</Button>
           </Link>
         </motion.div>
 
@@ -344,9 +344,14 @@ export function LandingPage() {
           <p className="text-text-secondary mb-8">
             Built for LIVE AI Ivy Plus 2026 — powered by BankSocial &amp; Hedera Hashgraph.
           </p>
-          <Link to="/onboarding">
-            <Button>Get started free</Button>
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link to="/onboarding">
+              <Button>Get started free</Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="secondary">Log in</Button>
+            </Link>
+          </div>
         </motion.div>
       </section>
     </div>

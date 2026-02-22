@@ -4,12 +4,14 @@ import { ProfileSetup } from './ProfileSetup';
 import { PlaidLinkButton } from './PlaidLinkButton';
 import { Spinner } from '../ui/Spinner';
 import { Card } from '../ui/Card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
 
 type Step = 'profile' | 'plaid' | 'building';
 
 export function OnboardingFlow() {
-  const [step, setStep] = useState<Step>('profile');
+  const user = useAuthStore((s) => s.user);
+  const [step, setStep] = useState<Step>(user ? 'plaid' : 'profile');
   const navigate = useNavigate();
 
   const handlePlaidSuccess = () => {
@@ -43,6 +45,12 @@ export function OnboardingFlow() {
         {step === 'profile' && (
           <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <ProfileSetup onNext={() => setStep('plaid')} />
+            <p className="text-sm text-text-secondary text-center mt-4">
+              Already have an account?{' '}
+              <Link to="/login" className="text-primary hover:underline">
+                Log in
+              </Link>
+            </p>
           </motion.div>
         )}
 
