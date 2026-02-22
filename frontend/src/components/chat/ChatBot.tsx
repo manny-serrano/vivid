@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, X, Send, Volume2, VolumeX, Zap, TrendingDown, Shield, Target, DollarSign, AlertTriangle, PiggyBank, CreditCard } from 'lucide-react';
 import { sendChatMessage } from '../../services/chatService';
 import { useAuthStore } from '../../store/authStore';
 import { useSpeech } from '../../hooks/useSpeech';
@@ -12,6 +12,17 @@ interface Message {
   content: string;
 }
 
+const QUICK_ACTIONS = [
+  { label: 'My scores', icon: Target, message: 'How am I doing overall? Break down all my scores.' },
+  { label: 'Red flags', icon: AlertTriangle, message: 'What are my red flags that would hurt a loan approval?' },
+  { label: 'Where does my money go?', icon: DollarSign, message: 'Where does my money go? Show me my top spending categories.' },
+  { label: 'How to improve', icon: Zap, message: 'What should I do first to improve my finances?' },
+  { label: 'Subscriptions', icon: CreditCard, message: 'How much am I spending on subscriptions? Which ones should I cut?' },
+  { label: 'Can I get a loan?', icon: Shield, message: 'Am I ready for a loan? What are my lending readiness scores?' },
+  { label: 'Savings potential', icon: PiggyBank, message: 'How much could I realistically save if I cut back?' },
+  { label: 'Debt check', icon: TrendingDown, message: 'How is my debt looking? What is my DTI ratio and trajectory?' },
+];
+
 export function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -19,13 +30,14 @@ export function ChatBot() {
       id: 'welcome',
       role: 'assistant',
       content:
-        "Hey! I'm your Vivid financial assistant. Pick a voice above — Nova or Atlas — and ask me anything about your finances!",
+        "Hey! I'm your Vivid financial assistant with full access to your bank data. I can answer detailed questions about your spending, income, debt, red flags, loan readiness, and more. Pick a voice above and ask anything — or tap a quick action below to get started!",
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [voice, setVoice] = useState<'nova' | 'atlas'>('nova');
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [showQuickActions, setShowQuickActions] = useState(true);
   const idToken = useAuthStore((s) => s.idToken);
   const { speak, stop, speaking, available: ttsAvailable } = useSpeech();
 
@@ -40,10 +52,10 @@ export function ChatBot() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
-    if (!text || loading) return;
+  const sendMessageText = useCallback(async (text: string) => {
+    if (!text.trim() || loading) return;
 
+    setShowQuickActions(false);
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
@@ -69,7 +81,15 @@ export function ChatBot() {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, autoSpeak, ttsAvailable, speak, voice]);
+  }, [loading, messages, autoSpeak, ttsAvailable, speak, voice]);
+
+  const sendMessage = useCallback(() => {
+    sendMessageText(input.trim());
+  }, [input, sendMessageText]);
+
+  const handleQuickAction = useCallback((msg: string) => {
+    sendMessageText(msg);
+  }, [sendMessageText]);
 
   const handleSpeakMessage = (content: string) => {
     if (speaking) {
@@ -80,6 +100,8 @@ export function ChatBot() {
   };
 
   if (!idToken) return null;
+
+  const hasOnlyWelcome = messages.length === 1 && messages[0].id === 'welcome';
 
   return (
     <>
@@ -108,7 +130,7 @@ export function ChatBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[540px] rounded-2xl border border-slate-700/60 bg-bg-base/95 backdrop-blur-xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[400px] h-[600px] rounded-2xl border border-slate-700/60 bg-bg-base/95 backdrop-blur-xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/60 bg-slate-800/50">
@@ -155,7 +177,7 @@ export function ChatBot() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
                       msg.role === 'user'
                         ? 'bg-primary/80 text-white rounded-br-md'
                         : 'bg-slate-800 text-text-primary rounded-bl-md'
@@ -174,6 +196,28 @@ export function ChatBot() {
                   </div>
                 </div>
               ))}
+
+              {/* Quick action chips — shown after welcome */}
+              {showQuickActions && hasOnlyWelcome && !loading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-wrap gap-2 pt-2"
+                >
+                  {QUICK_ACTIONS.map((action) => (
+                    <button
+                      key={action.label}
+                      onClick={() => handleQuickAction(action.message)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50 text-xs text-slate-300 hover:text-white hover:border-violet-500/50 hover:bg-violet-500/10 transition-all"
+                    >
+                      <action.icon className="h-3 w-3" />
+                      {action.label}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-slate-800 rounded-2xl rounded-bl-md px-4 py-3 flex gap-1.5">
@@ -200,7 +244,7 @@ export function ChatBot() {
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about your finances..."
+                  placeholder="Ask about spending, debt, loans, savings..."
                   className="flex-1 bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-slate-500 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
                   disabled={loading}
                 />
