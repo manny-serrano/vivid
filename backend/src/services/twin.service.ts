@@ -43,6 +43,7 @@ export async function generateTwin(userId: string): Promise<Twin> {
     name: t.name ?? '',
     merchant_name: t.merchant_name ?? null,
     category: t.category ?? null,
+    personal_finance_category: t.personal_finance_category ?? null,
     payment_channel: (t as { payment_channel?: string }).payment_channel ?? 'other',
     pending: (t as { pending?: boolean }).pending ?? false,
   }));

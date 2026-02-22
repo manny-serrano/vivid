@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { TwinRadarChart } from './TwinRadarChart';
 import { TwinScoreCard } from './TwinScoreCard';
 import { TwinTimeline } from './TwinTimeline';
+import { SpendingBreakdown } from './SpendingBreakdown';
 import { TwinNarrative } from './TwinNarrative';
 import { TwinVerificationBadge } from './TwinVerificationBadge';
 import { TwinPDFExport } from './TwinPDFExport';
@@ -107,8 +108,11 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
         </Card>
       </motion.div>
 
-      {/* Timeline */}
-      <TwinTimeline transactions={twin.transactions} />
+      {/* Timeline + Spending breakdown side by side */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <TwinTimeline transactions={twin.transactions} />
+        <SpendingBreakdown transactions={twin.transactions} />
+      </div>
 
       {/* Narrative */}
       <TwinNarrative narrative={twin.consumerNarrative} />

@@ -20,6 +20,13 @@ export type VividCategory =
   | 'transportation'
   | 'other';
 
+/** Plaid's modern personal_finance_category object. */
+export interface PersonalFinanceCategory {
+  primary: string;
+  detailed: string;
+  confidence_level?: string;
+}
+
 /** A raw transaction as returned by the Plaid API. */
 export interface PlaidTransaction {
   transaction_id: string;
@@ -29,6 +36,7 @@ export interface PlaidTransaction {
   name: string;
   merchant_name: string | null;
   category: string[] | null;
+  personal_finance_category?: PersonalFinanceCategory | null;
   payment_channel: string;
   pending: boolean;
 }
@@ -52,6 +60,84 @@ export interface EnrichedTransaction {
 // Category mapping tables
 // ---------------------------------------------------------------------------
 
+/**
+ * Maps Plaid's modern `personal_finance_category.primary` values
+ * to Vivid categories. Checked first for highest accuracy.
+ */
+const PFC_PRIMARY_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
+  ['INCOME', 'income'],
+  ['TRANSFER_IN', 'income'],
+  ['TRANSFER_OUT', 'other'],
+  ['LOAN_PAYMENTS', 'debt_payment'],
+  ['RENT_AND_UTILITIES', 'rent'],
+  ['FOOD_AND_DRINK', 'dining'],
+  ['GENERAL_MERCHANDISE', 'shopping'],
+  ['TRANSPORTATION', 'transportation'],
+  ['ENTERTAINMENT', 'entertainment'],
+  ['PERSONAL_CARE', 'shopping'],
+  ['MEDICAL', 'medical'],
+  ['HOME_IMPROVEMENT', 'shopping'],
+  ['GENERAL_SERVICES', 'other'],
+  ['GOVERNMENT_AND_NON_PROFIT', 'other'],
+  ['TRAVEL', 'transportation'],
+  ['BANK_FEES', 'other'],
+]);
+
+/**
+ * Maps Plaid's `personal_finance_category.detailed` values for finer
+ * resolution (e.g. distinguishing groceries from restaurants).
+ */
+const PFC_DETAILED_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
+  ['FOOD_AND_DRINK_GROCERIES', 'groceries'],
+  ['FOOD_AND_DRINK_RESTAURANT', 'dining'],
+  ['FOOD_AND_DRINK_COFFEE', 'dining'],
+  ['FOOD_AND_DRINK_FAST_FOOD', 'dining'],
+  ['FOOD_AND_DRINK_BEER_WINE_AND_LIQUOR', 'dining'],
+  ['RENT_AND_UTILITIES_RENT', 'rent'],
+  ['RENT_AND_UTILITIES_GAS_AND_ELECTRICITY', 'utilities'],
+  ['RENT_AND_UTILITIES_INTERNET_AND_CABLE', 'utilities'],
+  ['RENT_AND_UTILITIES_TELEPHONE', 'utilities'],
+  ['RENT_AND_UTILITIES_WATER', 'utilities'],
+  ['RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT', 'utilities'],
+  ['TRANSPORTATION_TAXIS_AND_RIDE_SHARES', 'transportation'],
+  ['TRANSPORTATION_GAS', 'transportation'],
+  ['TRANSPORTATION_PARKING', 'transportation'],
+  ['TRANSPORTATION_PUBLIC_TRANSIT', 'transportation'],
+  ['TRANSPORTATION_TOLLS', 'transportation'],
+  ['TRANSPORTATION_FLIGHTS', 'transportation'],
+  ['ENTERTAINMENT_MUSIC_AND_AUDIO', 'subscriptions'],
+  ['ENTERTAINMENT_TV_AND_MOVIES', 'subscriptions'],
+  ['ENTERTAINMENT_VIDEO_GAMES', 'entertainment'],
+  ['ENTERTAINMENT_SPORTING_EVENTS', 'entertainment'],
+  ['MEDICAL_INSURANCE_PREMIUMS', 'insurance'],
+  ['MEDICAL_VETERINARY_SERVICES', 'medical'],
+  ['LOAN_PAYMENTS_CAR_PAYMENT', 'debt_payment'],
+  ['LOAN_PAYMENTS_CREDIT_CARD_PAYMENT', 'debt_payment'],
+  ['LOAN_PAYMENTS_PERSONAL_LOAN_PAYMENT', 'debt_payment'],
+  ['LOAN_PAYMENTS_MORTGAGE_PAYMENT', 'debt_payment'],
+  ['LOAN_PAYMENTS_STUDENT_LOAN_PAYMENT', 'debt_payment'],
+  ['TRANSFER_IN_DEPOSIT', 'income'],
+  ['TRANSFER_IN_SAVINGS', 'savings_transfer'],
+  ['TRANSFER_OUT_SAVINGS', 'savings_transfer'],
+  ['TRANSFER_OUT_INVESTMENT', 'investment'],
+  ['TRANSFER_IN_INVESTMENT_AND_RETIREMENT_FUNDS', 'investment'],
+  ['TRANSFER_OUT_INVESTMENT_AND_RETIREMENT_FUNDS', 'investment'],
+  ['GENERAL_MERCHANDISE_CLOTHING_AND_ACCESSORIES', 'shopping'],
+  ['GENERAL_MERCHANDISE_ELECTRONICS', 'shopping'],
+  ['GENERAL_MERCHANDISE_SPORTING_GOODS', 'shopping'],
+  ['GENERAL_MERCHANDISE_DEPARTMENT_STORES', 'shopping'],
+  ['GENERAL_MERCHANDISE_DISCOUNT_STORES', 'shopping'],
+  ['GENERAL_MERCHANDISE_SUPERSTORES', 'groceries'],
+  ['GENERAL_MERCHANDISE_PET_SUPPLIES', 'shopping'],
+  ['GENERAL_MERCHANDISE_BOOKSTORES_AND_NEWSSTANDS', 'shopping'],
+  ['PERSONAL_CARE_GYMS_AND_FITNESS_CENTERS', 'entertainment'],
+  ['INCOME_WAGES', 'income'],
+  ['INCOME_DIVIDENDS', 'income'],
+  ['INCOME_INTEREST_EARNED', 'income'],
+  ['INCOME_RETIREMENT_PENSION', 'income'],
+  ['INCOME_TAX_REFUND', 'income'],
+]);
+
 const PLAID_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
   // Housing
   ['rent', 'rent'],
@@ -69,7 +155,6 @@ const PLAID_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
   // Utilities
   ['utilities', 'utilities'],
   ['electric', 'utilities'],
-  ['gas', 'utilities'],
   ['water', 'utilities'],
   ['internet', 'utilities'],
   ['phone', 'utilities'],
@@ -91,6 +176,7 @@ const PLAID_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
   ['music', 'entertainment'],
   ['movies', 'entertainment'],
   ['gyms and fitness centers', 'entertainment'],
+  ['sporting goods', 'entertainment'],
 
   // Shopping
   ['shops', 'shopping'],
@@ -99,13 +185,15 @@ const PLAID_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
   ['department stores', 'shopping'],
   ['discount stores', 'shopping'],
   ['digital purchase', 'shopping'],
+  ['sporting goods', 'shopping'],
+  ['bookstores', 'shopping'],
+  ['hardware store', 'shopping'],
 
   // Subscriptions
   ['subscription', 'subscriptions'],
   ['streaming', 'subscriptions'],
 
-  // Savings & investment
-  ['transfer', 'savings_transfer'],
+  // Savings & investment (not generic "transfer")
   ['savings', 'savings_transfer'],
   ['investment', 'investment'],
   ['brokerage', 'investment'],
@@ -124,12 +212,12 @@ const PLAID_TO_VIVID: ReadonlyMap<string, VividCategory> = new Map([
   ['parking', 'transportation'],
   ['car service', 'transportation'],
   ['airlines and aviation services', 'transportation'],
+  ['car dealers and leasing', 'transportation'],
+  ['public transportation services', 'transportation'],
 
   // Income
   ['income', 'income'],
   ['payroll', 'income'],
-  ['deposit', 'income'],
-  ['interest', 'income'],
   ['interest earned', 'income'],
 ]);
 
@@ -144,7 +232,11 @@ const MERCHANT_OVERRIDES: ReadonlyMap<string, VividCategory> = new Map([
   ['youtube premium', 'subscriptions'],
   ['hbo max', 'subscriptions'],
   ['paramount+', 'subscriptions'],
+  ['peacock', 'subscriptions'],
   ['adobe', 'subscriptions'],
+  ['microsoft 365', 'subscriptions'],
+  ['dropbox', 'subscriptions'],
+  ['icloud', 'subscriptions'],
 
   // Groceries
   ['walmart', 'groceries'],
@@ -156,6 +248,11 @@ const MERCHANT_OVERRIDES: ReadonlyMap<string, VividCategory> = new Map([
   ['aldi', 'groceries'],
   ['publix', 'groceries'],
   ['safeway', 'groceries'],
+  ['wegman', 'groceries'],
+  ['h-e-b', 'groceries'],
+  ['meijer', 'groceries'],
+  ['food lion', 'groceries'],
+  ['instacart', 'groceries'],
 
   // Dining
   ['starbucks', 'dining'],
@@ -166,6 +263,21 @@ const MERCHANT_OVERRIDES: ReadonlyMap<string, VividCategory> = new Map([
   ['uber eats', 'dining'],
   ['doordash', 'dining'],
   ['grubhub', 'dining'],
+  ['postmates', 'dining'],
+  ['seamless', 'dining'],
+  ['kfc', 'dining'],
+  ['subway', 'dining'],
+  ['wendy', 'dining'],
+  ['burger king', 'dining'],
+  ['taco bell', 'dining'],
+  ['panera', 'dining'],
+  ['panda express', 'dining'],
+  ['popeyes', 'dining'],
+  ['five guys', 'dining'],
+  ['shake shack', 'dining'],
+  ['domino', 'dining'],
+  ['pizza hut', 'dining'],
+  ['papa john', 'dining'],
 
   // Transportation
   ['uber', 'transportation'],
@@ -173,7 +285,53 @@ const MERCHANT_OVERRIDES: ReadonlyMap<string, VividCategory> = new Map([
   ['shell', 'transportation'],
   ['chevron', 'transportation'],
   ['exxon', 'transportation'],
-  ['bp', 'transportation'],
+  ['bp ', 'transportation'],
+  ['sunoco', 'transportation'],
+  ['speedway', 'transportation'],
+  ['wawa', 'transportation'],
+  ['united air', 'transportation'],
+  ['delta air', 'transportation'],
+  ['american air', 'transportation'],
+  ['southwest', 'transportation'],
+  ['jetblue', 'transportation'],
+  ['amtrak', 'transportation'],
+
+  // Entertainment (Plaid sandbox merchants)
+  ['touchstone climbing', 'entertainment'],
+  ['sparkfun', 'shopping'],
+  ['madison bicycle', 'shopping'],
+
+  // Shopping
+  ['amazon', 'shopping'],
+  ['best buy', 'shopping'],
+  ['home depot', 'shopping'],
+  ['lowes', 'shopping'],
+  ['ikea', 'shopping'],
+  ['nordstrom', 'shopping'],
+  ['macy', 'shopping'],
+  ['nike', 'shopping'],
+  ['apple store', 'shopping'],
+  ['sephora', 'shopping'],
+  ['etsy', 'shopping'],
+  ['ebay', 'shopping'],
+
+  // Utilities
+  ['at&t', 'utilities'],
+  ['verizon', 'utilities'],
+  ['t-mobile', 'utilities'],
+  ['comcast', 'utilities'],
+  ['xfinity', 'utilities'],
+  ['spectrum', 'utilities'],
+
+  // Insurance
+  ['geico', 'insurance'],
+  ['state farm', 'insurance'],
+  ['progressive', 'insurance'],
+  ['allstate', 'insurance'],
+
+  // Medical
+  ['cvs', 'medical'],
+  ['walgreen', 'medical'],
 
   // Investment
   ['robinhood', 'investment'],
@@ -307,9 +465,24 @@ function resolveCategory(
     }
   }
 
-  // 3. Plaid category hierarchy
+  // 3. Plaid personal_finance_category (modern field, very accurate)
+  if (tx.personal_finance_category) {
+    const detailed = tx.personal_finance_category.detailed;
+    const primary = tx.personal_finance_category.primary;
+
+    const detailedMatch = PFC_DETAILED_TO_VIVID.get(detailed);
+    if (detailedMatch) {
+      return { category: detailedMatch, confidence: 0.9 };
+    }
+
+    const primaryMatch = PFC_PRIMARY_TO_VIVID.get(primary);
+    if (primaryMatch) {
+      return { category: primaryMatch, confidence: 0.85 };
+    }
+  }
+
+  // 4. Plaid legacy category hierarchy
   if (tx.category && tx.category.length > 0) {
-    // Try most specific (last) to least specific (first)
     for (let i = tx.category.length - 1; i >= 0; i--) {
       const plaidCat = normalizeName(tx.category[i]);
       const mapped = PLAID_TO_VIVID.get(plaidCat);
@@ -318,7 +491,6 @@ function resolveCategory(
       }
     }
 
-    // Partial match on Plaid categories
     for (const plaidCat of tx.category) {
       const lower = normalizeName(plaidCat);
       for (const [key, cat] of PLAID_TO_VIVID) {
@@ -329,14 +501,14 @@ function resolveCategory(
     }
   }
 
-  // 4. Keyword scan on transaction name
+  // 5. Keyword scan on transaction name
   for (const [key, cat] of PLAID_TO_VIVID) {
     if (nameKey.includes(key)) {
       return { category: cat, confidence: 0.55 };
     }
   }
 
-  // 5. Negative amounts in Plaid typically represent income/credits
+  // 6. Negative amounts in Plaid typically represent income/credits
   if (tx.amount < 0) {
     return { category: 'income', confidence: 0.5 };
   }
