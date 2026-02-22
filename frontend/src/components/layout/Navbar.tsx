@@ -1,11 +1,27 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut, LogIn } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { auth } from '../../firebase';
+import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 
 export function Navbar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const isLanding = pathname === '/';
+
+  const qc = useQueryClient();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    logout();
+    qc.clear();
+    navigate('/');
+  };
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-700/60 bg-bg-base/80 backdrop-blur-md">
@@ -31,17 +47,28 @@ export function Navbar() {
             Dashboard
           </Link>
           <Link
-            to="/onboarding"
-            className={`transition-colors ${pathname === '/onboarding' ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
-          >
-            Get started
-          </Link>
-          <Link
             to="/institution/login"
             className={`transition-colors ${pathname.startsWith('/institution') ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
           >
             Institutions
           </Link>
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-text-secondary hover:text-danger transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className={`flex items-center gap-1.5 transition-colors ${pathname === '/login' ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
+            >
+              <LogIn className="h-4 w-4" />
+              Log in
+            </Link>
+          )}
         </div>
       </div>
     </nav>
