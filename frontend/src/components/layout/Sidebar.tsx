@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck,
   Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network,
-  Code2, Target, RefreshCw, Briefcase, ChevronDown,
+  Code2, Target, RefreshCw, Briefcase, ChevronDown, Fingerprint, BarChart3,
 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
@@ -26,6 +26,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/twin', label: 'My Twin', icon: User },
+      { to: '/identity', label: 'My Identity', icon: Fingerprint },
+      { to: '/benchmark', label: 'How I Compare', icon: BarChart3 },
       { to: '/goals', label: 'Goals', icon: Target },
     ],
   },

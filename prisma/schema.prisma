@@ -495,3 +495,62 @@ model NotificationPreference {
 
   @@map("notification_preferences")
 }
+
+// ─── User Profile (Demographics for Benchmarking + Credit Invisible) ────────
+
+model UserProfile {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  ageRange          AgeRange?
+  city              String?
+  state             String?
+  incomeRange       IncomeRange?
+  employmentType    EmploymentType?
+  creditStatus      CreditStatus      @default(UNKNOWN)
+  hasFico           Boolean           @default(false)
+  isInternational   Boolean           @default(false)
+  isStudent         Boolean           @default(false)
+  isGigWorker       Boolean           @default(false)
+  identityVerified  Boolean           @default(false)
+  onboardedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("user_profiles")
+}
+
+enum AgeRange {
+  UNDER_18
+  AGE_18_24
+  AGE_25_34
+  AGE_35_44
+  AGE_45_54
+  AGE_55_64
+  AGE_65_PLUS
+}
+
+enum IncomeRange {
+  UNDER_25K
+  RANGE_25K_50K
+  RANGE_50K_75K
+  RANGE_75K_100K
+  RANGE_100K_150K
+  RANGE_150K_PLUS
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  GIG_FREELANCE
+  SELF_EMPLOYED
+  STUDENT
+  UNEMPLOYED
+  RETIRED
+}
+
+enum CreditStatus {
+  UNKNOWN
+  CREDIT_INVISIBLE
+  THIN_FILE
+  ESTABLISHED
+}

@@ -28,7 +28,7 @@ function ProgressRing({ progress, size = 48 }: { progress: number; size?: number
   const c = 2 * Math.PI * r;
   const pct = Math.min(100, Math.max(0, progress));
   return (
-    <svg width={size} height={size} className="shrink-0 -rotate-90">
+    <svg width={size} height={size} className="shrink-0" style={{ transform: 'rotate(-90deg)' }}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" className="text-slate-700/40" strokeWidth={4} />
       <motion.circle
         cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#goalGrad)"
@@ -90,9 +90,11 @@ function GoalCard({ goal, onUpdate, onDelete }: {
     >
       <Card className={`p-4 transition-all hover:border-primary/30 ${isComplete ? 'border-emerald-500/30 bg-emerald-500/5' : ''}`}>
         <div className="flex items-start gap-3">
-          <div className="relative">
-            <ProgressRing progress={progress} />
-            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold rotate-90">
+          <div className="relative" style={{ width: 48, height: 48 }}>
+            <div className="absolute inset-0">
+              <ProgressRing progress={progress} />
+            </div>
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">
               {Math.round(progress)}%
             </span>
           </div>
