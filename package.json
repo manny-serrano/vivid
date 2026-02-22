@@ -9,9 +9,9 @@
     "backend"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev -w frontend\"",
     "dev:frontend": "npm run dev -w frontend",
-    "dev:backend": "npm run dev -w backend",
+    "dev:backend": "dotenv -e .env -- npm run dev -w backend",
     "build": "npm run build -w packages/shared && npm run build -w backend && npm run build -w frontend",
     "build:shared": "npm run build -w packages/shared",
     "build:frontend": "npm run build -w frontend",
@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit -p frontend/tsconfig.json && tsc --noEmit -p backend/tsconfig.json"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.2",
     "concurrently": "^9.1.0",
     "eslint": "^8.57.0",
     "prettier": "^3.4.2",
