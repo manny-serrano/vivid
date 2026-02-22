@@ -14,6 +14,10 @@ const schema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Valid email required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 type FormData = z.infer<typeof schema>;
@@ -111,6 +115,16 @@ export function ProfileSetup({ onNext }: ProfileSetupProps) {
             placeholder="At least 6 characters"
           />
           {errors.password && <p className="text-sm text-danger mt-1">{errors.password.message}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-400 mb-1">Confirm password</label>
+          <input
+            {...register('confirmPassword')}
+            type="password"
+            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+            placeholder="Re-enter your password"
+          />
+          {errors.confirmPassword && <p className="text-sm text-danger mt-1">{errors.confirmPassword.message}</p>}
         </div>
         {error && <p className="text-sm text-danger">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading}>

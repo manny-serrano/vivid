@@ -24,6 +24,9 @@ export async function authPreHandler(
   if (!authHeader?.startsWith('Bearer ')) {
     throw new UnauthorizedError('Missing or invalid Authorization header');
   }
+  if (!firebaseAuth) {
+    throw new UnauthorizedError('Firebase is not configured');
+  }
   const token = authHeader.slice(7);
   try {
     const decoded = await firebaseAuth.verifyIdToken(token);

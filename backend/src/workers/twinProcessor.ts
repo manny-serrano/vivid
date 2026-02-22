@@ -19,6 +19,12 @@ export async function processTwinGenerationMessage(
   message: TwinGenerationPayload,
 ): Promise<void> {
   const { userId } = message;
+  if (!firestore) {
+    logger.warn('Firestore not configured; skipping twin status updates');
+    const twin = await generateTwin(userId);
+    logger.info('Twin generation completed (no Firestore)', { userId, twinId: twin.id });
+    return;
+  }
   const docRef = firestore.collection('twinStatus').doc(userId);
 
   try {

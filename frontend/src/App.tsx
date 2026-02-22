@@ -11,6 +11,7 @@ import { SharePage } from './pages/SharePage';
 import { ShareViewPage } from './pages/ShareViewPage';
 import { InstitutionLoginPage } from './pages/InstitutionLoginPage';
 import { InstitutionDashboardPage } from './pages/InstitutionDashboardPage';
+import { ChatBot } from './components/chat/ChatBot';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             </Routes>
           </main>
         </div>
+        <ChatBot />
       </BrowserRouter>
     </QueryClientProvider>
   );

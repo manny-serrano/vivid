@@ -24,6 +24,7 @@ export async function registerInstitutionHandler(
   const parsed = registerInstitutionSchema.safeParse(request.body);
   if (!parsed.success) throw new BadRequestError(parsed.error.message);
 
+  if (!firebaseAuth) throw new BadRequestError('Firebase is not configured');
   const decoded = await firebaseAuth.verifyIdToken(parsed.data.firebaseToken);
   const { firebaseToken: _ft, ...rest } = parsed.data;
   const inst = await registerInstitution({

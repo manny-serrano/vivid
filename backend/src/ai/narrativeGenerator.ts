@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// Vivid – Narrative Generation via Google Vertex AI (Gemini)
+// Vivid – Narrative Generation via Google Vertex AI (Gemini) with fallback
 // ---------------------------------------------------------------------------
 
-import { VertexAI } from '@google-cloud/vertexai';
 import { env } from '../config/env.js';
+import { logger } from '../utils/logger.js';
 import type { VividScores } from './scoreCalculator.js';
 import type { TransactionPatterns } from './prompts/scoringPrompt.js';
 import {
@@ -17,24 +17,51 @@ import {
 import { buildLendingReadinessPrompt } from './prompts/lendingReadinessPrompt.js';
 
 // ---------------------------------------------------------------------------
-// Vertex AI client singleton
+// Vertex AI client (lazy, may be null if GCP auth unavailable)
 // ---------------------------------------------------------------------------
 
-const vertexAI = new VertexAI({
-  project: env.GCP_PROJECT_ID,
-  location: env.VERTEX_AI_LOCATION,
-});
+let vertexModel: ReturnType<Awaited<ReturnType<typeof initVertexAI>>['getGenerativeModel']> | null = null;
+let vertexAvailable: boolean | null = null;
 
-function getModel(systemInstruction?: string) {
-  return vertexAI.getGenerativeModel({
-    model: env.VERTEX_AI_MODEL,
-    generationConfig: {
-      temperature: 0.7,
-      topP: 0.9,
-      maxOutputTokens: 2048,
-    },
-    ...(systemInstruction ? { systemInstruction } : {}),
-  });
+async function initVertexAI() {
+  const { VertexAI } = await import('@google-cloud/vertexai');
+  return new VertexAI({ project: env.GCP_PROJECT_ID, location: env.VERTEX_AI_LOCATION });
+}
+
+async function getModel(systemInstruction?: string) {
+  if (vertexAvailable === false) return null;
+
+  try {
+    const vertexAI = await initVertexAI();
+    const model = vertexAI.getGenerativeModel({
+      model: env.VERTEX_AI_MODEL,
+      generationConfig: { temperature: 0.7, topP: 0.9, maxOutputTokens: 2048 },
+      ...(systemInstruction ? { systemInstruction } : {}),
+    });
+    vertexAvailable = true;
+    return model;
+  } catch {
+    vertexAvailable = false;
+    return null;
+  }
+}
+
+async function callGemini(systemInstruction: string | undefined, userPrompt: string): Promise<string | null> {
+  try {
+    const model = await getModel(systemInstruction);
+    if (!model) return null;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+    });
+    return result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+  } catch (err) {
+    logger.warn('[narrative] Vertex AI call failed, using template fallback', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    vertexAvailable = false;
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -59,13 +86,6 @@ export interface LendingReadinessResult {
 // Public API
 // ---------------------------------------------------------------------------
 
-/**
- * Generate a warm, consumer-facing financial narrative using Gemini.
- *
- * @param scores              - The Vivid pillar scores.
- * @param transactionPatterns - Summarised spending/income patterns.
- * @returns The generated narrative as a plain-text string.
- */
 export async function generateConsumerNarrative(
   scores: VividScores,
   transactionPatterns: TransactionPatterns,
@@ -73,83 +93,39 @@ export async function generateConsumerNarrative(
   const strengths = deriveStrengths(scores);
   const improvements = deriveImprovements(scores);
 
-  const userPrompt = buildConsumerNarrativePrompt(
-    scores,
-    strengths,
-    improvements,
-    transactionPatterns,
-  );
+  const userPrompt = buildConsumerNarrativePrompt(scores, strengths, improvements, transactionPatterns);
+  const aiText = await callGemini(CONSUMER_NARRATIVE_SYSTEM_PROMPT, userPrompt);
+  if (aiText) return aiText;
 
-  const model = getModel(CONSUMER_NARRATIVE_SYSTEM_PROMPT);
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-  });
-
-  const response = result.response;
-  const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error('Gemini returned an empty consumer narrative response');
-  }
-  return text;
+  return buildFallbackConsumerNarrative(scores, strengths, improvements, transactionPatterns);
 }
 
-/**
- * Generate a clinical, institution-facing underwriting narrative using Gemini.
- *
- * @param scores              - The Vivid pillar scores.
- * @param transactionPatterns - Summarised spending/income patterns.
- * @param analysisMonths      - Number of months of data analysed.
- * @returns The generated narrative as a plain-text string.
- */
 export async function generateInstitutionNarrative(
   scores: VividScores,
   transactionPatterns: TransactionPatterns,
   analysisMonths: number,
 ): Promise<string> {
-  const userPrompt = buildInstitutionNarrativePrompt(
-    scores,
-    transactionPatterns,
-    analysisMonths,
-  );
+  const userPrompt = buildInstitutionNarrativePrompt(scores, transactionPatterns, analysisMonths);
+  const aiText = await callGemini(INSTITUTION_NARRATIVE_SYSTEM_PROMPT, userPrompt);
+  if (aiText) return aiText;
 
-  const model = getModel(INSTITUTION_NARRATIVE_SYSTEM_PROMPT);
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-  });
-
-  const response = result.response;
-  const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error('Gemini returned an empty institution narrative response');
-  }
-  return text;
+  return buildFallbackInstitutionNarrative(scores, transactionPatterns, analysisMonths);
 }
 
-/**
- * Generate per-product lending readiness scores using Gemini.
- *
- * @param scores - The Vivid pillar scores.
- * @returns Parsed readiness scores and rationales for four loan products.
- */
 export async function generateLendingReadiness(
   scores: VividScores,
 ): Promise<LendingReadinessResult> {
   const prompt = buildLendingReadinessPrompt(scores);
+  const aiText = await callGemini(undefined, prompt);
 
-  const model = getModel();
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-  });
-
-  const response = result.response;
-  const raw = response.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!raw) {
-    throw new Error('Gemini returned an empty lending readiness response');
+  if (aiText) {
+    try {
+      const cleaned = aiText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      return validateLendingReadiness(JSON.parse(cleaned));
+    } catch { /* fall through to deterministic */ }
   }
 
-  const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  const parsed: unknown = JSON.parse(cleaned);
-  return validateLendingReadiness(parsed);
+  return computeDeterministicLendingReadiness(scores);
 }
 
 // ---------------------------------------------------------------------------
@@ -213,4 +189,154 @@ function deriveImprovements(scores: VividScores): string[] {
   if (scores.growthMomentum < 50)
     improvements.push('Consider automating savings and exploring investment options');
   return improvements;
+}
+
+// ---------------------------------------------------------------------------
+// Template-based fallbacks (used when Vertex AI is unavailable)
+// ---------------------------------------------------------------------------
+
+function tier(score: number): string {
+  if (score >= 80) return 'excellent';
+  if (score >= 65) return 'strong';
+  if (score >= 50) return 'moderate';
+  if (score >= 35) return 'developing';
+  return 'early-stage';
+}
+
+function buildFallbackConsumerNarrative(
+  scores: VividScores,
+  strengths: string[],
+  improvements: string[],
+  patterns: TransactionPatterns,
+): string {
+  const overall = scores.overall;
+  const pillarEntries: [string, number][] = [
+    ['Income Stability', scores.incomeStability],
+    ['Spending Discipline', scores.spendingDiscipline],
+    ['Debt Trajectory', scores.debtTrajectory],
+    ['Financial Resilience', scores.financialResilience],
+    ['Growth Momentum', scores.growthMomentum],
+  ];
+  pillarEntries.sort((a, b) => b[1] - a[1]);
+
+  let narrative = `Your overall Vivid Score is ${overall.toFixed(0)} out of 100 — that puts you in the ${tier(overall)} range. `;
+
+  if (overall >= 65) {
+    narrative += `This is a solid foundation that reflects real financial discipline.\n\n`;
+  } else if (overall >= 45) {
+    narrative += `You're building momentum, and there are clear opportunities ahead.\n\n`;
+  } else {
+    narrative += `Every journey starts somewhere, and the fact that you're here shows you're ready to grow.\n\n`;
+  }
+
+  for (const [name, score] of pillarEntries) {
+    narrative += `Your ${name} score is ${score.toFixed(0)}/100 (${tier(score)}). `;
+    if (score >= 70) {
+      narrative += `This is one of your standout areas — keep doing what you're doing here.\n\n`;
+    } else if (score >= 50) {
+      narrative += `You're on the right track, with room to push this even higher.\n\n`;
+    } else {
+      narrative += `This is an area with the most opportunity for growth.\n\n`;
+    }
+  }
+
+  if (strengths.length > 0) {
+    narrative += `Your key strengths: ${strengths.join('; ')}.\n\n`;
+  }
+
+  if (improvements.length > 0) {
+    narrative += `Next steps to consider: ${improvements.join('; ')}.\n\n`;
+  }
+
+  if (patterns.primaryIncomeSource !== 'Unknown') {
+    narrative += `Based on ${patterns.monthsAnalysed} months of data, your primary income source is ${patterns.primaryIncomeSource}. `;
+  }
+
+  narrative += `You're already ahead by understanding your full financial picture — that's what Vivid is all about. Keep going!`;
+
+  return narrative;
+}
+
+function buildFallbackInstitutionNarrative(
+  scores: VividScores,
+  patterns: TransactionPatterns,
+  analysisMonths: number,
+): string {
+  const lines: string[] = [
+    `VIVID FINANCIAL TWIN — INSTITUTION SUMMARY`,
+    `Analysis Period: ${analysisMonths} months | Generated: ${new Date().toISOString().slice(0, 10)}`,
+    ``,
+    `OVERALL VIVID SCORE: ${scores.overall.toFixed(1)} / 100 (${tier(scores.overall).toUpperCase()})`,
+    ``,
+    `PILLAR BREAKDOWN:`,
+    `  Income Stability:       ${scores.incomeStability.toFixed(1)} / 100`,
+    `  Spending Discipline:    ${scores.spendingDiscipline.toFixed(1)} / 100`,
+    `  Debt Trajectory:        ${scores.debtTrajectory.toFixed(1)} / 100`,
+    `  Financial Resilience:   ${scores.financialResilience.toFixed(1)} / 100`,
+    `  Growth Momentum:        ${scores.growthMomentum.toFixed(1)} / 100`,
+    ``,
+    `TRANSACTION PATTERNS:`,
+    `  Primary Income Source: ${patterns.primaryIncomeSource}`,
+    `  Top Merchants: ${patterns.topMerchants.slice(0, 5).join(', ') || 'N/A'}`,
+    `  Recurring Charges: ${patterns.recurringCharges.length} identified`,
+    `  Unusual Spending Spikes: ${patterns.unusualSpikes.length || 'None'}`,
+    ``,
+    `RISK ASSESSMENT:`,
+  ];
+
+  if (scores.overall >= 70) {
+    lines.push(`  This applicant demonstrates strong financial behavior across multiple dimensions.`);
+    lines.push(`  Recommended for standard underwriting consideration.`);
+  } else if (scores.overall >= 50) {
+    lines.push(`  This applicant shows moderate financial stability with identifiable areas of risk.`);
+    lines.push(`  Additional documentation may strengthen the application.`);
+  } else {
+    lines.push(`  This applicant's financial profile indicates elevated risk in several dimensions.`);
+    lines.push(`  Enhanced due diligence is recommended.`);
+  }
+
+  return lines.join('\n');
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v));
+}
+
+function computeDeterministicLendingReadiness(scores: VividScores): LendingReadinessResult {
+  let personal = scores.incomeStability * 0.4 + scores.spendingDiscipline * 0.4 + scores.debtTrajectory * 0.2;
+  if (scores.incomeStability < 40 || scores.spendingDiscipline < 35) personal = Math.min(personal, 50);
+  if (scores.debtTrajectory < 30) personal -= 15;
+
+  let auto = scores.debtTrajectory * 0.4 + scores.incomeStability * 0.35 + scores.financialResilience * 0.25;
+  if (scores.debtTrajectory < 35) auto = Math.min(auto, 45);
+  if (scores.incomeStability > 70 && scores.debtTrajectory > 60) auto += 10;
+
+  let mortgage = (scores.incomeStability + scores.spendingDiscipline + scores.debtTrajectory + scores.financialResilience + scores.growthMomentum) / 5;
+  const minPillar = Math.min(scores.incomeStability, scores.spendingDiscipline, scores.debtTrajectory, scores.financialResilience, scores.growthMomentum);
+  if (minPillar < 40) mortgage = Math.min(mortgage, 40);
+  if (minPillar > 60) mortgage += 10;
+  if (scores.financialResilience < 50) mortgage -= 10;
+
+  let smallBiz = scores.growthMomentum * 0.35 + scores.incomeStability * 0.35 + scores.financialResilience * 0.3;
+  if (scores.growthMomentum < 30) smallBiz = Math.min(smallBiz, 35);
+  if (scores.incomeStability > 65 && scores.growthMomentum > 55) smallBiz += 15;
+
+  return {
+    personalLoanReadiness: {
+      score: clamp(Math.round(personal), 0, 100),
+      rationale: `Based on income stability (${scores.incomeStability.toFixed(0)}) and spending discipline (${scores.spendingDiscipline.toFixed(0)}) as primary factors.`,
+    },
+    autoLoanReadiness: {
+      score: clamp(Math.round(auto), 0, 100),
+      rationale: `Weighted on debt trajectory (${scores.debtTrajectory.toFixed(0)}) and income stability (${scores.incomeStability.toFixed(0)}).`,
+    },
+    mortgageReadiness: {
+      score: clamp(Math.round(mortgage), 0, 100),
+      rationale: `All five pillars weighted equally; minimum pillar score is ${minPillar.toFixed(0)}.`,
+    },
+    smallBizReadiness: {
+      score: clamp(Math.round(smallBiz), 0, 100),
+      rationale: `Driven by growth momentum (${scores.growthMomentum.toFixed(0)}) and income stability (${scores.incomeStability.toFixed(0)}).`,
+    },
+  };
 }

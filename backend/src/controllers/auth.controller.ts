@@ -20,6 +20,7 @@ export async function register(
   }
   const { firebaseToken, firstName, lastName } = parsed.data;
 
+  if (!firebaseAuth) throw new BadRequestError('Firebase is not configured');
   const decoded = await firebaseAuth.verifyIdToken(firebaseToken);
   const email = decoded.email ?? '';
   if (!email) throw new BadRequestError('Email required');
