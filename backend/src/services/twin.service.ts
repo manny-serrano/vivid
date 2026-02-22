@@ -4,6 +4,8 @@ import type { PlaidTransaction } from '../ai/transactionCategorizer.js';
 import { stampProfileOnHedera } from '../blockchain/stampProfile.js';
 import { decrypt } from './encryption.service.js';
 import { getTransactions } from './plaid.service.js';
+import { runDetectors } from './notification-detector.js';
+import { logger } from '../utils/logger.js';
 import type { Twin } from '@prisma/client';
 
 /**
@@ -59,7 +61,27 @@ export async function generateTwin(userId: string): Promise<Twin> {
 
   const stamp = await stampProfileOnHedera(profileForHash, userId);
 
+  const oldTwin = await prisma.twin.findUnique({
+    where: { userId },
+    include: { transactions: true },
+  });
+
   const twin = await persistTwin(userId, twinData, stamp);
+
+  // Fire-and-forget notification detection
+  runDetectors({
+    userId,
+    newTwin: twin,
+    oldTwin,
+    transactions: twinData.enrichedTransactions.map((t) => ({
+      amount: t.amount,
+      merchantName: t.merchantName,
+      vividCategory: t.vividCategory,
+      isIncomeDeposit: t.isIncomeDeposit,
+      isRecurring: t.isRecurring,
+      date: new Date(t.date),
+    })),
+  }).catch((err) => logger.error('[twin] Notification detection failed', { error: err }));
 
   return twin;
 }

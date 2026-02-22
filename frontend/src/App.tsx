@@ -31,6 +31,7 @@ import { WidgetEmbedPage } from './pages/WidgetEmbedPage';
 import { GoalsPage } from './pages/GoalsPage';
 import { SyncPage } from './pages/SyncPage';
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/sync" element={<SyncPage />} />
                 <Route path="/partner" element={<PartnerDashboardPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
               </Routes>
             </main>
           </div>

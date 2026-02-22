@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, LogIn } from 'lucide-react';
+import { Menu, X, LogOut, LogIn, Bell } from 'lucide-react';
 import { signOut } from 'firebase/auth';
+import { useQuery } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { auth } from '../../firebase';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
+import { notificationService } from '../../services/notificationService';
 
 export function Navbar() {
   const { pathname } = useLocation();
@@ -15,6 +17,13 @@ export function Navbar() {
   const isLanding = pathname === '/';
 
   const qc = useQueryClient();
+
+  const { data: unreadCount } = useQuery({
+    queryKey: ['unread-count'],
+    queryFn: notificationService.unreadCount,
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -53,6 +62,21 @@ export function Navbar() {
           >
             Institutions
           </Link>
+
+          {user && (
+            <Link
+              to="/notifications"
+              className={`relative transition-colors ${pathname === '/notifications' ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
+            >
+              <Bell className="h-4.5 w-4.5" />
+              {(unreadCount ?? 0) > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white px-1">
+                  {unreadCount! > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {user ? (
             <button
               onClick={handleLogout}

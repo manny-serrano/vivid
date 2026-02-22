@@ -435,3 +435,63 @@ enum PartnerTier {
   GROWTH
   ENTERPRISE
 }
+
+// ─── Notifications & Alerts ─────────────────────────────────────────────────
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String
+  type        NotificationType
+  severity    NotificationSeverity @default(INFO)
+  title       String
+  body        String             @db.Text
+  actionUrl   String?
+  readAt      DateTime?
+  dismissedAt DateTime?
+  metadata    String?            @db.Text
+  createdAt   DateTime           @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  SCORE_MILESTONE
+  SCORE_DROP
+  INCOME_LATE
+  INCOME_DROP
+  SPENDING_SPIKE
+  SUBSCRIPTION_CHANGE
+  DTI_WARNING
+  GOAL_PROGRESS
+  GOAL_COMPLETED
+  RED_FLAG_NEW
+  SYNC_COMPLETE
+  GENERAL
+}
+
+enum NotificationSeverity {
+  INFO
+  SUCCESS
+  WARNING
+  CRITICAL
+}
+
+model NotificationPreference {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  inApp       Boolean  @default(true)
+  email       Boolean  @default(false)
+  push        Boolean  @default(false)
+  scoreAlerts Boolean  @default(true)
+  incomeAlerts Boolean @default(true)
+  spendAlerts  Boolean @default(true)
+  goalAlerts   Boolean @default(true)
+  quietStart   Int     @default(22)
+  quietEnd     Int     @default(7)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("notification_preferences")
+}

@@ -16,6 +16,7 @@ import { widgetRoutes } from './widget.routes.js';
 import { goalsRoutes } from './goals.routes.js';
 import { syncRoutes } from './sync.routes.js';
 import { partnerRoutes } from './partner.routes.js';
+import { notificationRoutes } from './notification.routes.js';
 import { env } from '../config/env.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
@@ -37,4 +38,5 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(goalsRoutes, { prefix: `${prefix}/goals` });
   await app.register(syncRoutes, { prefix: `${prefix}/sync` });
   await app.register(partnerRoutes, { prefix: `${prefix}/partners` });
+  await app.register(notificationRoutes, { prefix: `${prefix}/notifications` });
 }
