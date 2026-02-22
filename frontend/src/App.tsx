@@ -15,6 +15,10 @@ import { ShareViewPage } from './pages/ShareViewPage';
 import { InstitutionLoginPage } from './pages/InstitutionLoginPage';
 import { InstitutionDashboardPage } from './pages/InstitutionDashboardPage';
 import { ChatBot } from './components/chat/ChatBot';
+import { ZkpPage } from './pages/ZkpPage';
+import { ZkpVerifyPage } from './pages/ZkpVerifyPage';
+import { BadgePage } from './pages/BadgePage';
+import { BadgeVerifyPage } from './pages/BadgeVerifyPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -55,6 +59,10 @@ function App() {
                 <Route path="/share/:token" element={<ShareViewPage />} />
                 <Route path="/institution/login" element={<InstitutionLoginPage />} />
                 <Route path="/institution" element={<InstitutionDashboardPage />} />
+                <Route path="/zkp" element={<ZkpPage />} />
+                <Route path="/zkp/verify/:proofHash" element={<ZkpVerifyPage />} />
+                <Route path="/badges" element={<BadgePage />} />
+                <Route path="/verify/:consentToken" element={<BadgeVerifyPage />} />
               </Routes>
             </main>
           </div>

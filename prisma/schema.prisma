@@ -132,3 +132,43 @@ enum InstitutionType {
   COMMUNITY_BANK
   OTHER
 }
+
+model ZkpClaim {
+  id                  String    @id @default(cuid())
+  userId              String
+  twinId              String
+  claimType           String
+  claimStatement      String
+  claimResult         Boolean
+  claimHash           String
+  proofHash           String    @unique
+  hederaTransactionId String?
+  hederaTimestamp      DateTime?
+  hederaTopicId       String?
+  recipientLabel      String?
+  expiresAt           DateTime?
+  revokedAt           DateTime?
+  accessCount         Int       @default(0)
+  createdAt           DateTime  @default(now())
+
+  @@index([proofHash])
+  @@index([userId])
+  @@map("zkp_claims")
+}
+
+model VerifiedBadge {
+  id              String    @id @default(cuid())
+  userId          String
+  consentToken    String    @unique @default(uuid())
+  label           String?
+  allowedScopes   String[]
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  accessCount     Int       @default(0)
+  lastAccessedAt  DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([consentToken])
+  @@index([userId])
+  @@map("verified_badges")
+}

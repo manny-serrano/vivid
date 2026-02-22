@@ -1,11 +1,13 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, Share2, Building2 } from 'lucide-react';
+import { LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/twin', label: 'My Twin', icon: User },
   { to: '/share', label: 'Share', icon: Share2 },
+  { to: '/zkp', label: 'ZK Proofs', icon: ShieldCheck },
+  { to: '/badges', label: 'Verified Badge', icon: BadgeCheck },
   { to: '/institution', label: 'Institution', icon: Building2 },
 ];
 
