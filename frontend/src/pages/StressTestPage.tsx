@@ -5,6 +5,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { ScoreMeter } from '../components/ui/ScoreMeter';
+import { useTranslation } from '../i18n/useTranslation';
 import { insightsService } from '../services/insightsService';
 import type { RunwayResult, StressTestInput } from '../services/insightsService';
 import {
@@ -20,6 +21,7 @@ const SEVERITY_STYLES = {
 };
 
 export function StressTestPage() {
+  const { t } = useTranslation();
   const [selectedScenario, setSelectedScenario] = useState('lose_primary_income');
   const [customIncome, setCustomIncome] = useState('');
   const [customExpense, setCustomExpense] = useState('');
@@ -54,7 +56,7 @@ export function StressTestPage() {
   const sev = result ? SEVERITY_STYLES[result.impactSeverity] : null;
 
   return (
-    <PageWrapper title="Predictive Stress Testing">
+    <PageWrapper title={t('stressTest.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Run "What-If" simulations against your Financial Twin. See how many months
         of runway you'd have if life threw a curveball — something FICO can't tell you.

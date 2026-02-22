@@ -16,34 +16,36 @@ import { Button } from '../ui/Button';
 import type { TwinProfile } from '../../services/twinService';
 import { fetchSnapshots, fetchCategoryAggregates, regenerateTwin } from '../../services/twinService';
 import { RADAR_COLORS } from '../../utils/chartHelpers';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface TwinDashboardProps {
   twin: TwinProfile;
 }
 
 const DIMENSIONS = [
-  { key: 'incomeStabilityScore', label: 'Income Stability' },
-  { key: 'spendingDisciplineScore', label: 'Spending Discipline' },
-  { key: 'debtTrajectoryScore', label: 'Debt Trajectory' },
-  { key: 'financialResilienceScore', label: 'Financial Resilience' },
-  { key: 'growthMomentumScore', label: 'Growth Momentum' },
+  { key: 'incomeStabilityScore', i18n: 'pillar.incomeStability' },
+  { key: 'spendingDisciplineScore', i18n: 'pillar.spendingDiscipline' },
+  { key: 'debtTrajectoryScore', i18n: 'pillar.debtTrajectory' },
+  { key: 'financialResilienceScore', i18n: 'pillar.financialResilience' },
+  { key: 'growthMomentumScore', i18n: 'pillar.growthMomentum' },
 ] as const;
 
 const LOAN_TYPES = [
-  { key: 'personalLoanReadiness', label: 'Personal' },
-  { key: 'autoLoanReadiness', label: 'Auto' },
-  { key: 'mortgageReadiness', label: 'Mortgage' },
-  { key: 'smallBizReadiness', label: 'Small Business' },
+  { key: 'personalLoanReadiness', i18n: 'loan.personal' },
+  { key: 'autoLoanReadiness', i18n: 'loan.auto' },
+  { key: 'mortgageReadiness', i18n: 'loan.mortgage' },
+  { key: 'smallBizReadiness', i18n: 'loan.smallBiz' },
 ] as const;
 
 export function TwinDashboard({ twin }: TwinDashboardProps) {
   const queryClient = useQueryClient();
   const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const refreshMutation = useMutation({
     mutationFn: regenerateTwin,
     onSuccess: () => {
-      setRefreshMsg('Twin is regenerating — this may take a moment...');
+      setRefreshMsg(t('dashboard.regenerating'));
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['twin'] });
         queryClient.invalidateQueries({ queryKey: ['twin-snapshots'] });
@@ -52,7 +54,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
       }, 5000);
     },
     onError: () => {
-      setRefreshMsg('Failed to refresh. Please try again.');
+      setRefreshMsg(t('dashboard.refreshFailed'));
       setTimeout(() => setRefreshMsg(null), 4000);
     },
   });
@@ -69,7 +71,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
 
   const dimensions = DIMENSIONS.map((d) => ({
     key: d.key,
-    label: d.label,
+    label: t(d.i18n),
     score: twin[d.key] as number,
   }));
 
@@ -80,7 +82,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
   const ghostDimensions = previousSnapshot
     ? DIMENSIONS.map((d) => ({
         key: d.key,
-        label: d.label,
+        label: t(d.i18n),
         score: previousSnapshot[d.key] as number,
       }))
     : undefined;
@@ -99,7 +101,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
         />
         <div className="flex items-center gap-4">
           <span className="text-sm text-text-secondary">
-            {twin.transactionCount} transactions &middot; {twin.analysisMonths} months
+            {twin.transactionCount} {t('common.transactions')} &middot; {twin.analysisMonths} {t('common.months')}
           </span>
           <Button
             variant="secondary"
@@ -108,7 +110,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
             className="flex items-center gap-2 text-sm"
           >
             <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-            {refreshMutation.isPending ? 'Refreshing...' : 'Refresh Twin'}
+            {refreshMutation.isPending ? t('common.refreshing') : t('dashboard.refreshTwin')}
           </Button>
           <TwinPDFExport />
         </div>
@@ -182,13 +184,13 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
         transition={{ delay: 0.4, duration: 0.5 }}
       >
         <Card>
-          <h3 className="text-lg font-semibold mb-4">Lending readiness</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('dashboard.lendingReadiness')}</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {LOAN_TYPES.map((lt) => {
               const score = twin[lt.key] as number;
               return (
                 <div key={lt.key}>
-                  <p className="text-sm font-medium text-text-secondary mb-1">{lt.label}</p>
+                  <p className="text-sm font-medium text-text-secondary mb-1">{t(lt.i18n)}</p>
                   <p className="text-2xl font-bold">{Math.round(score)}</p>
                   <ScoreMeter score={score} showLabel={true} className="mt-2" />
                 </div>

@@ -16,24 +16,27 @@ import {
   Copy, Check, Send, RefreshCw, AlertTriangle, ChevronRight,
   Wand2, ArrowLeft, Mail,
 } from 'lucide-react';
-
-const CONFIDENCE_STYLES = {
-  high: { bg: 'bg-danger/10', border: 'border-danger/30', text: 'text-danger', label: 'High Savings' },
-  medium: { bg: 'bg-warning/10', border: 'border-warning/30', text: 'text-warning', label: 'Moderate' },
-  low: { bg: 'bg-info/10', border: 'border-info/30', text: 'text-info', label: 'Worth Trying' },
-};
-
-const TONE_OPTIONS = [
-  { value: 'professional', label: 'Professional', desc: 'Formal and business-like' },
-  { value: 'friendly', label: 'Friendly', desc: 'Warm but persuasive' },
-  { value: 'firm', label: 'Firm', desc: 'Direct, willing to switch' },
-];
+import { useTranslation } from '../i18n/useTranslation';
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
 export function NegotiatePage() {
+  const { t } = useTranslation();
+
+  const CONFIDENCE_STYLES = {
+    high: { bg: 'bg-danger/10', border: 'border-danger/30', text: 'text-danger', label: t('negotiate.highSavings') },
+    medium: { bg: 'bg-warning/10', border: 'border-warning/30', text: 'text-warning', label: t('negotiate.moderate') },
+    low: { bg: 'bg-info/10', border: 'border-info/30', text: 'text-info', label: t('negotiate.worthTrying') },
+  };
+
+  const TONE_OPTIONS = [
+    { value: 'professional', label: t('negotiate.toneProf'), desc: t('negotiate.toneProfDesc') },
+    { value: 'friendly', label: t('negotiate.toneFriendly'), desc: t('negotiate.toneFriendlyDesc') },
+    { value: 'firm', label: t('negotiate.toneFirm'), desc: t('negotiate.toneFirmDesc') },
+  ];
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['negotiate-bills'],
     queryFn: negotiateService.detectBills,
@@ -115,18 +118,18 @@ export function NegotiatePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Spinner />
-        <p className="text-text-secondary text-sm">Scanning your bills for savings opportunities...</p>
+        <p className="text-text-secondary text-sm">{t('negotiate.scanning')}</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <PageWrapper title="Bill Negotiator">
+      <PageWrapper title={t('negotiate.title')}>
         <Card className="text-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
           <p className="text-text-secondary">
-            Could not analyze your bills. Make sure your Financial Twin exists.
+            {t('common.error')}
           </p>
         </Card>
       </PageWrapper>
@@ -138,14 +141,14 @@ export function NegotiatePage() {
 
   if (selectedBill) {
     return (
-      <PageWrapper title="Bill Negotiator">
+      <PageWrapper title={t('negotiate.title')}>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
           <button
             onClick={handleBack}
             className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to all bills
+            {t('negotiate.backToBills')}
           </button>
 
           {/* Bill summary header */}
@@ -170,7 +173,7 @@ export function NegotiatePage() {
                 />
               </div>
               <span className="text-xs text-text-secondary whitespace-nowrap">
-                Fair: {formatCurrency(selectedBill.estimatedFair)}/mo
+                {t('negotiate.fairRate')}: {formatCurrency(selectedBill.estimatedFair)}/mo
               </span>
             </div>
           </Card>
@@ -180,10 +183,10 @@ export function NegotiatePage() {
             <Card className="p-6 mb-6">
               <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                Generate Negotiation Email
+                {t('negotiate.generateEmail')}
               </h3>
               <p className="text-sm text-text-secondary mb-4">
-                Choose a tone and we'll draft a personalized email you can send to {selectedBill.merchantName}.
+                {t('negotiate.chooseTone')}
               </p>
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {TONE_OPTIONS.map((t) => (
@@ -208,12 +211,12 @@ export function NegotiatePage() {
               >
                 {generateMutation.isPending ? (
                   <>
-                    <Spinner /> Generating...
+                    <Spinner /> {t('negotiate.generating')}
                   </>
                 ) : (
                   <>
                     <Mail className="h-4 w-4 mr-2" />
-                    Generate Email
+                    {t('negotiate.generateEmail')}
                   </>
                 )}
               </Button>
@@ -228,7 +231,7 @@ export function NegotiatePage() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                       <Mail className="h-5 w-5 text-primary" />
-                      Your Negotiation Email
+                      {t('negotiate.yourEmail')}
                     </h3>
                     <div className="flex items-center gap-2">
                       <Button
@@ -252,13 +255,13 @@ export function NegotiatePage() {
 
                   {email.recipientHint && (
                     <div className="text-xs text-text-secondary mb-3">
-                      <span className="font-medium">Suggested recipient:</span> {email.recipientHint}
+                      <span className="font-medium">{t('negotiate.suggestedRecipient')}:</span> {email.recipientHint}
                     </div>
                   )}
 
                   {/* Subject */}
                   <div className="mb-3">
-                    <label className="text-xs font-medium text-text-secondary block mb-1">Subject</label>
+                    <label className="text-xs font-medium text-text-secondary block mb-1">{t('negotiate.subject')}</label>
                     {isEditing ? (
                       <input
                         value={editedSubject}
@@ -274,7 +277,7 @@ export function NegotiatePage() {
 
                   {/* Body */}
                   <div className="mb-4">
-                    <label className="text-xs font-medium text-text-secondary block mb-1">Body</label>
+                    <label className="text-xs font-medium text-text-secondary block mb-1">{t('negotiate.body')}</label>
                     {isEditing ? (
                       <textarea
                         ref={textareaRef}
@@ -294,7 +297,7 @@ export function NegotiatePage() {
                   <div className="flex flex-wrap gap-2">
                     <Button onClick={handleCopy}>
                       {copied ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
-                      {copied ? 'Copied!' : 'Copy to Clipboard'}
+                      {copied ? t('negotiate.copied') : t('negotiate.copyClipboard')}
                     </Button>
                     <Button
                       variant="secondary"
@@ -304,7 +307,7 @@ export function NegotiatePage() {
                       }}
                     >
                       <Send className="h-4 w-4 mr-1.5" />
-                      Open in Email Client
+                      {t('negotiate.openEmail')}
                     </Button>
                   </div>
                 </Card>
@@ -313,11 +316,10 @@ export function NegotiatePage() {
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
                     <Wand2 className="h-5 w-5 text-primary" />
-                    Refine with AI
+                    {t('negotiate.refineAI')}
                   </h3>
                   <p className="text-sm text-text-secondary mb-4">
-                    Tell the AI how you'd like to change the email. For example: "make it sound more firm",
-                    "add that I've been a customer for 5 years", or "make it shorter and more professional".
+                    {t('negotiate.refineDesc')}
                   </p>
                   <div className="flex gap-2">
                     <input
@@ -340,7 +342,7 @@ export function NegotiatePage() {
                       ) : (
                         <>
                           <Wand2 className="h-4 w-4 mr-1.5" />
-                          Refine
+                          {t('negotiate.refine')}
                         </>
                       )}
                     </Button>
@@ -379,38 +381,38 @@ export function NegotiatePage() {
   }
 
   return (
-    <PageWrapper title="Bill Negotiator">
+    <PageWrapper title={t('negotiate.title')}>
       {/* Hero stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <Card className="p-5 text-center">
           <MessageSquareDashed className="h-8 w-8 mx-auto text-primary mb-2" />
           <div className="text-3xl font-bold text-text-primary">{bills.length}</div>
-          <div className="text-sm text-text-secondary">Negotiable Bills</div>
+          <div className="text-sm text-text-secondary">{t('negotiate.negotiableBills')}</div>
         </Card>
         <Card className="p-5 text-center">
           <TrendingDown className="h-8 w-8 mx-auto text-success mb-2" />
           <div className="text-3xl font-bold text-success">{formatCurrency(totalAnnualSavings)}</div>
-          <div className="text-sm text-text-secondary">Potential Annual Savings</div>
+          <div className="text-sm text-text-secondary">{t('negotiate.annualSavings')}</div>
         </Card>
         <Card className="p-5 text-center">
           <DollarSign className="h-8 w-8 mx-auto text-warning mb-2" />
           <div className="text-3xl font-bold text-warning">{formatCurrency(totalAnnualSavings / 12)}</div>
-          <div className="text-sm text-text-secondary">Monthly Savings</div>
+          <div className="text-sm text-text-secondary">{t('negotiate.monthlySavings')}</div>
         </Card>
       </div>
 
       {bills.length === 0 ? (
         <Card className="p-12 text-center">
           <Check className="h-12 w-12 mx-auto text-success mb-4" />
-          <h3 className="text-lg font-semibold text-text-primary mb-2">Your bills look great!</h3>
+          <h3 className="text-lg font-semibold text-text-primary mb-2">{t('negotiate.billsGreat')}</h3>
           <p className="text-text-secondary text-sm max-w-md mx-auto">
-            We didn't find any bills significantly above market rate. We'll keep monitoring and alert you if any opportunities come up.
+            {t('negotiate.billsGreatDesc')}
           </p>
         </Card>
       ) : (
         <>
           <h2 className="text-lg font-semibold text-text-primary mb-4">
-            Bills You Could Be Paying Less For
+            {t('negotiate.payingLess')}
           </h2>
           <div className="space-y-3">
             {bills.map((bill, i) => {

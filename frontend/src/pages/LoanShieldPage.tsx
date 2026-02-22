@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { optimizerService } from '../services/optimizerService';
 import type { DocumentDraft, RiskLevel } from '../services/optimizerService';
 import {
@@ -31,6 +32,7 @@ const ALERT_ICONS: Record<string, typeof AlertTriangle> = {
 };
 
 export function LoanShieldPage() {
+  const { t } = useTranslation();
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['loan-shield'],
     queryFn: optimizerService.getLoanShield,
@@ -51,7 +53,7 @@ export function LoanShieldPage() {
 
   if (error || !report) {
     return (
-      <PageWrapper title="Student Loan Shield">
+      <PageWrapper title={t('loanShield.title')}>
         <Card className="text-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
           <p className="text-text-secondary">Could not run shield analysis. Make sure your Financial Twin exists.</p>
@@ -73,7 +75,7 @@ export function LoanShieldPage() {
     : <Minus className="h-4 w-4 text-text-secondary" />;
 
   return (
-    <PageWrapper title="Student Loan Shield">
+    <PageWrapper title={t('loanShield.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Your AI agent monitors your income via Plaid and detects when you're at risk of
         missing loan payments. If risk is detected, it auto-drafts IDR and deferment

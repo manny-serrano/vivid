@@ -36,6 +36,7 @@ import { IdentityPage } from './pages/IdentityPage';
 import { BenchmarkPage } from './pages/BenchmarkPage';
 import { NegotiatePage } from './pages/NegotiatePage';
 import { WrappedPage } from './pages/WrappedPage';
+import { LanguagePage } from './pages/LanguagePage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -102,6 +103,7 @@ function App() {
                         <Route path="/identity" element={<IdentityPage />} />
                         <Route path="/benchmark" element={<BenchmarkPage />} />
                         <Route path="/negotiate" element={<NegotiatePage />} />
+                <Route path="/language" element={<LanguagePage />} />
                       </Routes>
                     </main>
                   </div>

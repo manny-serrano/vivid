@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { identityService } from '../services/identityService';
 import type { IdentityCard, ProfileInput, AgeRange, IncomeRange, EmploymentType } from '../services/identityService';
 import {
@@ -310,6 +311,7 @@ function ProfileSetup({ onComplete }: { onComplete: (data: ProfileInput) => void
 }
 
 export function IdentityPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
 
   const { data: card, isLoading: cardLoading } = useQuery({
@@ -337,11 +339,11 @@ export function IdentityPage() {
   const showSetup = profile && !profile.onboardedAt && !setupMut.isSuccess;
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('identity.title')}>
       <div className="max-w-3xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Fingerprint className="w-7 h-7 text-primary" /> Financial Identity
+            <Fingerprint className="w-7 h-7 text-primary" /> {t('identity.title')}
           </h1>
           <p className="text-text-secondary text-sm mt-1">
             Your Vivid-powered financial identity — no credit score required. Built from real bank data, verified on-chain.

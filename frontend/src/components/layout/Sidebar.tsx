@@ -4,71 +4,73 @@ import {
   LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck,
   Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network,
   Code2, Target, RefreshCw, Briefcase, ChevronDown, Fingerprint, BarChart3,
-  MessageSquareDashed, Gift,
+  MessageSquareDashed, Gift, Globe,
 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
+import { useTranslation } from '../../i18n/useTranslation';
 
 interface NavItem {
   to: string;
-  label: string;
+  i18nKey: string;
   icon: typeof LayoutDashboard;
 }
 
 interface NavGroup {
-  label: string;
+  i18nKey: string;
   items: NavItem[];
   defaultOpen?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Overview',
+    i18nKey: 'sidebar.overview',
     defaultOpen: true,
     items: [
-      { to: '/wrapped', label: 'Vivid Wrapped', icon: Gift },
-      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/twin', label: 'My Twin', icon: User },
-      { to: '/identity', label: 'My Identity', icon: Fingerprint },
-      { to: '/benchmark', label: 'How I Compare', icon: BarChart3 },
-      { to: '/goals', label: 'Goals', icon: Target },
+      { to: '/wrapped', i18nKey: 'sidebar.wrapped', icon: Gift },
+      { to: '/dashboard', i18nKey: 'sidebar.dashboard', icon: LayoutDashboard },
+      { to: '/twin', i18nKey: 'sidebar.twin', icon: User },
+      { to: '/identity', i18nKey: 'sidebar.identity', icon: Fingerprint },
+      { to: '/benchmark', i18nKey: 'sidebar.benchmark', icon: BarChart3 },
+      { to: '/goals', i18nKey: 'sidebar.goals', icon: Target },
     ],
   },
   {
-    label: 'Insights',
+    i18nKey: 'sidebar.insights',
     defaultOpen: true,
     items: [
-      { to: '/red-flags', label: 'Red Flags', icon: ShieldAlert },
-      { to: '/time-machine', label: 'Time Machine', icon: Clock },
-      { to: '/optimize', label: 'Optimize Spend', icon: Scissors },
-      { to: '/loan-shield', label: 'Loan Shield', icon: Shield },
-      { to: '/stress-test', label: 'Stress Test', icon: Zap },
-      { to: '/anomalies', label: 'Anomalies', icon: AlertTriangle },
-      { to: '/negotiate', label: 'Bill Negotiator', icon: MessageSquareDashed },
+      { to: '/red-flags', i18nKey: 'sidebar.redFlags', icon: ShieldAlert },
+      { to: '/time-machine', i18nKey: 'sidebar.timeMachine', icon: Clock },
+      { to: '/optimize', i18nKey: 'sidebar.optimize', icon: Scissors },
+      { to: '/loan-shield', i18nKey: 'sidebar.loanShield', icon: Shield },
+      { to: '/stress-test', i18nKey: 'sidebar.stressTest', icon: Zap },
+      { to: '/anomalies', i18nKey: 'sidebar.anomalies', icon: AlertTriangle },
+      { to: '/negotiate', i18nKey: 'sidebar.negotiate', icon: MessageSquareDashed },
     ],
   },
   {
-    label: 'Trust & Sharing',
+    i18nKey: 'sidebar.trust',
     defaultOpen: false,
     items: [
-      { to: '/share', label: 'Share', icon: Share2 },
-      { to: '/reputation', label: 'Reputation', icon: Network },
-      { to: '/zkp', label: 'ZK Proofs', icon: ShieldCheck },
-      { to: '/badges', label: 'Verified Badge', icon: BadgeCheck },
+      { to: '/share', i18nKey: 'sidebar.share', icon: Share2 },
+      { to: '/reputation', i18nKey: 'sidebar.reputation', icon: Network },
+      { to: '/zkp', i18nKey: 'sidebar.zkp', icon: ShieldCheck },
+      { to: '/badges', i18nKey: 'sidebar.badges', icon: BadgeCheck },
     ],
   },
   {
-    label: 'Platform',
+    i18nKey: 'sidebar.platform',
     defaultOpen: false,
     items: [
-      { to: '/sync', label: 'Data Sync', icon: RefreshCw },
-      { to: '/widgets', label: 'Embed Widget', icon: Code2 },
-      { to: '/partner', label: 'Partner Portal', icon: Briefcase },
-      { to: '/institution', label: 'Institution', icon: Building2 },
+      { to: '/sync', i18nKey: 'sidebar.sync', icon: RefreshCw },
+      { to: '/widgets', i18nKey: 'sidebar.widgets', icon: Code2 },
+      { to: '/partner', i18nKey: 'sidebar.partner', icon: Briefcase },
+      { to: '/institution', i18nKey: 'sidebar.institution', icon: Building2 },
+      { to: '/language', i18nKey: 'common.language', icon: Globe },
     ],
   },
 ];
 
-function SidebarGroup({ group, pathname }: { group: NavGroup; pathname: string }) {
+function SidebarGroup({ group, pathname, t }: { group: NavGroup; pathname: string; t: (key: string) => string }) {
   const hasActiveChild = group.items.some((item) => pathname.startsWith(item.to));
   const [open, setOpen] = useState(group.defaultOpen || hasActiveChild);
 
@@ -78,7 +80,7 @@ function SidebarGroup({ group, pathname }: { group: NavGroup; pathname: string }
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary/60 hover:text-text-secondary transition-colors"
       >
-        {group.label}
+        {t(group.i18nKey)}
         <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
       </button>
 
@@ -88,7 +90,7 @@ function SidebarGroup({ group, pathname }: { group: NavGroup; pathname: string }
         }`}
       >
         <ul className="space-y-0.5 pb-1">
-          {group.items.map(({ to, label, icon: Icon }) => (
+          {group.items.map(({ to, i18nKey, icon: Icon }) => (
             <li key={to}>
               <NavLink
                 to={to}
@@ -101,7 +103,7 @@ function SidebarGroup({ group, pathname }: { group: NavGroup; pathname: string }
                 }
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" />
-                {label}
+                {t(i18nKey)}
               </NavLink>
             </li>
           ))}
@@ -114,6 +116,7 @@ function SidebarGroup({ group, pathname }: { group: NavGroup; pathname: string }
 export function Sidebar() {
   const open = useUIStore((s) => s.sidebarOpen);
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   if (pathname === '/') return null;
   if (!open) return null;
 
@@ -121,7 +124,7 @@ export function Sidebar() {
     <aside className="w-52 shrink-0 border-r border-slate-700/60 bg-bg-surface/50 p-3 min-h-[calc(100vh-56px)] overflow-y-auto">
       <div className="space-y-2">
         {NAV_GROUPS.map((group) => (
-          <SidebarGroup key={group.label} group={group} pathname={pathname} />
+          <SidebarGroup key={group.i18nKey} group={group} pathname={pathname} t={t} />
         ))}
       </div>
     </aside>

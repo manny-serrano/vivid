@@ -10,6 +10,7 @@ import {
   AlertTriangle, ChevronDown, Eye, Clock,
   CheckCircle2, ArrowRight, ShieldAlert,
 } from 'lucide-react';
+import { useTranslation } from '../i18n/useTranslation';
 
 const SEVERITY_STYLES: Record<FlagSeverity, {
   bg: string; border: string; text: string; dot: string; label: string; icon: string;
@@ -46,6 +47,7 @@ function FixTimelineCard({ fix }: { fix: FixTimeline }) {
 }
 
 function RedFlagCard({ flag, index }: { flag: RedFlag; index: number }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const style = SEVERITY_STYLES[flag.severity];
 
@@ -92,7 +94,7 @@ function RedFlagCard({ flag, index }: { flag: RedFlag; index: number }) {
                 <div className="bg-bg-surface/80 rounded-xl p-4 border border-slate-700/50">
                   <p className="text-xs font-semibold text-text-secondary mb-1 flex items-center gap-1">
                     <Eye className="h-3 w-3" />
-                    What lenders actually see
+                    {t('redFlags.lenderView')}
                   </p>
                   <p className="text-sm leading-relaxed">{flag.lenderPerspective}</p>
                 </div>
@@ -101,7 +103,7 @@ function RedFlagCard({ flag, index }: { flag: RedFlag; index: number }) {
                 <div>
                   <p className="text-xs font-semibold text-text-secondary mb-3 flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    How to fix this
+                    {t('redFlags.howToFix')}
                   </p>
                   <div className="space-y-3">
                     {flag.fixes.map((fix, i) => (
@@ -119,6 +121,7 @@ function RedFlagCard({ flag, index }: { flag: RedFlag; index: number }) {
 }
 
 export function RedFlagsPage() {
+  const { t } = useTranslation();
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['red-flags'],
     queryFn: redFlagsService.getReport,
@@ -128,29 +131,26 @@ export function RedFlagsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Spinner />
-        <p className="text-text-secondary text-sm">Scanning your financial profile for red flags...</p>
+        <p className="text-text-secondary text-sm">{t('redFlags.analyzing')}</p>
       </div>
     );
   }
 
   if (error || !report) {
     return (
-      <PageWrapper title="Your Financial Red Flags">
+      <PageWrapper title={t('redFlags.title')}>
         <Card className="text-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
-          <p className="text-text-secondary">Could not generate red flags report. Make sure your Financial Twin exists.</p>
+          <p className="text-text-secondary">{t('common.error')}</p>
         </Card>
       </PageWrapper>
     );
   }
 
   return (
-    <PageWrapper title="Your Financial Red Flags">
-      <p className="text-text-secondary mb-2 max-w-2xl">
-        The things banks see but never tell you.
-      </p>
+    <PageWrapper title={t('redFlags.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl text-sm">
-        If you applied for a loan tomorrow, here's what would hurt you — and exactly how to fix each one.
+        {t('redFlags.subtitle')}
       </p>
 
       {/* Summary banner */}
@@ -178,19 +178,19 @@ export function RedFlagsPage() {
                 {report.redCount > 0 && (
                   <span className="flex items-center gap-1.5 text-sm">
                     <span className="h-2.5 w-2.5 rounded-full bg-danger" />
-                    <span className="font-semibold text-danger">{report.redCount} critical</span>
+                    <span className="font-semibold text-danger">{report.redCount} {t('redFlags.critical').toLowerCase()}</span>
                   </span>
                 )}
                 {report.yellowCount > 0 && (
                   <span className="flex items-center gap-1.5 text-sm">
                     <span className="h-2.5 w-2.5 rounded-full bg-warning" />
-                    <span className="font-semibold text-warning">{report.yellowCount} warning</span>
+                    <span className="font-semibold text-warning">{report.yellowCount} {t('redFlags.warning').toLowerCase()}</span>
                   </span>
                 )}
                 {report.greenCount > 0 && (
                   <span className="flex items-center gap-1.5 text-sm">
                     <span className="h-2.5 w-2.5 rounded-full bg-success" />
-                    <span className="font-semibold text-success">{report.greenCount} minor</span>
+                    <span className="font-semibold text-success">{report.greenCount} {t('redFlags.minor').toLowerCase()}</span>
                   </span>
                 )}
               </div>
@@ -209,7 +209,7 @@ export function RedFlagsPage() {
           <div className="flex items-center gap-4">
             <CheckCircle2 className="h-8 w-8 text-success shrink-0" />
             <div>
-              <p className="text-xl font-bold">No red flags detected</p>
+              <p className="text-xl font-bold">{t('redFlags.noFlags')}</p>
               <p className="text-sm text-text-secondary mt-1">{report.loanReadinessVerdict}</p>
             </div>
           </div>

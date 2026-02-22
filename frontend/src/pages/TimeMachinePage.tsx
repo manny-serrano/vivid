@@ -9,6 +9,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { timeMachineService } from '../services/timeMachineService';
 import type { ScenarioPreset, TimeMachineResult } from '../services/timeMachineService';
 import {
@@ -84,6 +85,7 @@ function MetricCard({
 }
 
 export function TimeMachinePage() {
+  const { t } = useTranslation();
   const { data: presets, isLoading: presetsLoading } = useQuery({
     queryKey: ['time-machine-presets'],
     queryFn: timeMachineService.getPresets,
@@ -154,7 +156,7 @@ export function TimeMachinePage() {
   }
 
   return (
-    <PageWrapper title="Vivid Time Machine™">
+    <PageWrapper title={t('timeMachine.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Show me who I'll be in 12 months. Select life decisions below and watch
         your financial future unfold — based on your real transaction behavior.

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { attestationService } from '../services/attestationService';
 import type {
   Attestation,
@@ -450,6 +451,7 @@ function RequestModal({ onClose, onSubmit }: {
 // ---------------------------------------------------------------------------
 
 export function ReputationPage() {
+  const { t } = useTranslation();
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestResult, setRequestResult] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -471,7 +473,7 @@ export function ReputationPage() {
 
   if (isLoading) {
     return (
-      <PageWrapper title="Reputation Graph">
+      <PageWrapper title={t('reputation.title')}>
         <div className="flex justify-center py-20"><Spinner /></div>
       </PageWrapper>
     );
@@ -479,7 +481,7 @@ export function ReputationPage() {
 
   if (error || !data) {
     return (
-      <PageWrapper title="Reputation Graph">
+      <PageWrapper title={t('reputation.title')}>
         <Card className="p-8 text-center">
           <p className="text-text-secondary">Could not load reputation data.</p>
         </Card>
@@ -490,7 +492,7 @@ export function ReputationPage() {
   const { attestations, reputation, graph } = data;
 
   return (
-    <PageWrapper title="Reputation Graph">
+    <PageWrapper title={t('reputation.title')}>
       {/* Success toast */}
       <AnimatePresence>
         {requestResult && (

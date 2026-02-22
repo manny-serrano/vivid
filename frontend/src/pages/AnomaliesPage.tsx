@@ -5,6 +5,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { ScoreMeter } from '../components/ui/ScoreMeter';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { insightsService } from '../services/insightsService';
 import type { Anomaly } from '../services/insightsService';
 import {
@@ -31,6 +32,7 @@ const TYPE_ICONS: Record<string, typeof AlertTriangle> = {
 };
 
 export function AnomaliesPage() {
+  const { t } = useTranslation();
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['anomalies'],
     queryFn: insightsService.getAnomalies,
@@ -50,7 +52,7 @@ export function AnomaliesPage() {
 
   if (error || !report) {
     return (
-      <PageWrapper title="Anomaly Detection">
+      <PageWrapper title={t('anomalies.title')}>
         <Card className="text-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
           <p className="text-text-secondary">Could not load anomaly report. Make sure your Financial Twin exists.</p>
@@ -64,7 +66,7 @@ export function AnomaliesPage() {
   const infos = report.anomalies.filter((a) => a.severity === 'info');
 
   return (
-    <PageWrapper title="Anomaly Detection">
+    <PageWrapper title={t('anomalies.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Your Financial Twin automatically flags patterns like Lifestyle Creep, Subscription Bloat,
         and spending anomalies — turning your narrative into actionable advice.

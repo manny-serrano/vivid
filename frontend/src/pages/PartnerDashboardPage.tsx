@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { partnerService } from '../services/partnerService';
 import type {
   PartnerDashboard, RegisterPartnerInput, TierLimits,
@@ -331,6 +332,7 @@ function TierCards({ currentTier }: { currentTier: string }) {
 }
 
 export function PartnerDashboardPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [newApiKey, setNewApiKey] = useState<string | null>(null);
 
@@ -356,7 +358,7 @@ export function PartnerDashboardPage() {
   const isNotRegistered = error && !isLoading;
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('partner.title')}>
       <div className="max-w-5xl mx-auto">
         {isLoading && <Spinner className="mx-auto mt-16" />}
 

@@ -7,6 +7,8 @@ import { auth } from '../../firebase';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import { notificationService } from '../../services/notificationService';
+import { LanguageSelector } from './LanguageSelector';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export function Navbar() {
   const { pathname } = useLocation();
@@ -15,6 +17,7 @@ export function Navbar() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const isLanding = pathname === '/';
+  const { t } = useTranslation();
 
   const qc = useQueryClient();
 
@@ -54,14 +57,16 @@ export function Navbar() {
             to="/dashboard"
             className={`transition-colors ${pathname === '/dashboard' ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
           >
-            Dashboard
+            {t('nav.dashboard')}
           </Link>
           <Link
             to="/institution/login"
             className={`transition-colors ${pathname.startsWith('/institution') ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
           >
-            Institutions
+            {t('nav.institutions')}
           </Link>
+
+          <LanguageSelector />
 
           {user && (
             <Link
@@ -83,7 +88,7 @@ export function Navbar() {
               className="flex items-center gap-1.5 text-text-secondary hover:text-danger transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              Log out
+              {t('nav.logout')}
             </button>
           ) : (
             <Link
@@ -91,7 +96,7 @@ export function Navbar() {
               className={`flex items-center gap-1.5 transition-colors ${pathname === '/login' ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
             >
               <LogIn className="h-4 w-4" />
-              Log in
+              {t('nav.login')}
             </Link>
           )}
         </div>

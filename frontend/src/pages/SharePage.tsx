@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from '../i18n/useTranslation';
 import { useCreateShare, useShareTokens, useRevokeShare } from '../hooks/useShare';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Button } from '../components/ui/Button';
@@ -22,6 +23,7 @@ const PERMISSION_FLAGS = [
 type PermKey = (typeof PERMISSION_FLAGS)[number]['key'];
 
 export function SharePage() {
+  const { t } = useTranslation();
   const { data: tokens, isLoading } = useShareTokens();
   const createShare = useCreateShare();
   const revokeShare = useRevokeShare();
@@ -87,7 +89,7 @@ export function SharePage() {
   }>;
 
   return (
-    <PageWrapper title="Share your Twin">
+    <PageWrapper title={t('share.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Generate permissioned links to share your Financial Twin with lenders.
         You control exactly which dimensions they can see.

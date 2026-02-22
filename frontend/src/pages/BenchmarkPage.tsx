@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { benchmarkService } from '../services/benchmarkService';
 import type { BenchmarkResult, PercentileResult, BenchmarkFilters } from '../services/benchmarkService';
 import {
@@ -204,6 +205,7 @@ function FilterBar({ filters, onChange }: { filters: BenchmarkFilters; onChange:
 }
 
 export function BenchmarkPage() {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<BenchmarkFilters>({});
 
   const { data, isLoading } = useQuery<BenchmarkResult>({
@@ -212,11 +214,11 @@ export function BenchmarkPage() {
   });
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('benchmark.title')}>
       <div className="max-w-3xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart3 className="w-7 h-7 text-primary" /> How Do I Compare?
+            <BarChart3 className="w-7 h-7 text-primary" /> {t('benchmark.title')}
           </h1>
           <p className="text-text-secondary text-sm mt-1">
             Anonymous benchmarks against people like you. No PII leaves the system.
@@ -225,7 +227,12 @@ export function BenchmarkPage() {
 
         <FilterBar filters={filters} onChange={setFilters} />
 
-        {isLoading && <Spinner className="mx-auto mt-16" />}
+        {isLoading && (
+          <div className="flex flex-col items-center gap-4 mt-16">
+            <Spinner className="mx-auto" />
+            <p className="text-text-secondary text-sm">{t('benchmark.loading')}</p>
+          </div>
+        )}
 
         {data && (
           <>

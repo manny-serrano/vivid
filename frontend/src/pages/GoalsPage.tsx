@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { goalsService } from '../services/goalsService';
 import type { Goal, GoalStats, GoalCategory, CreateGoalInput } from '../services/goalsService';
 import {
@@ -328,6 +329,7 @@ function StatsBar({ stats }: { stats: GoalStats }) {
 }
 
 export function GoalsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
@@ -359,14 +361,14 @@ export function GoalsPage() {
   });
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('goals.title')}>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Milestone className="w-7 h-7 text-primary" /> Goals & Milestones
+                <Milestone className="w-7 h-7 text-primary" /> {t('goals.title')}
               </h1>
               <p className="text-text-secondary text-sm mt-1">
                 Set targets, track progress, hit milestones — prove product-market fit with retention.
@@ -415,8 +417,8 @@ export function GoalsPage() {
         {!isLoading && filtered.length === 0 && (
           <Card className="p-12 text-center">
             <Target className="w-12 h-12 text-text-secondary mx-auto mb-3 opacity-40" />
-            <h3 className="font-semibold text-lg mb-1">No goals yet</h3>
-            <p className="text-text-secondary text-sm mb-4">Create your first financial goal to start tracking progress.</p>
+            <h3 className="font-semibold text-lg mb-1">{t('goals.noGoals')}</h3>
+            <p className="text-text-secondary text-sm mb-4">{t('goals.noGoalsDesc')}</p>
             <button
               onClick={() => setShowCreate(true)}
               className="px-4 py-2 text-sm bg-primary text-white rounded-xl hover:bg-primary/90"

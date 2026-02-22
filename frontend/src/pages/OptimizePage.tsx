@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { optimizerService } from '../services/optimizerService';
 import type { CancelAction } from '../services/optimizerService';
 import {
@@ -21,6 +22,7 @@ const DIFFICULTY_STYLES = {
 };
 
 export function OptimizePage() {
+  const { t } = useTranslation();
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['optimize-spend'],
     queryFn: optimizerService.getSubscriptions,
@@ -40,7 +42,7 @@ export function OptimizePage() {
 
   if (error || !report) {
     return (
-      <PageWrapper title="Optimize My Spend">
+      <PageWrapper title={t('optimize.title')}>
         <Card className="text-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
           <p className="text-text-secondary">Could not analyze spending. Make sure your Financial Twin exists.</p>
@@ -50,7 +52,7 @@ export function OptimizePage() {
   }
 
   return (
-    <PageWrapper title="Optimize My Spend">
+    <PageWrapper title={t('optimize.title')}>
       <p className="text-text-secondary mb-8 max-w-2xl">
         Your AI agent analyzed your Plaid data to find unnecessary charges — fast food, delivery apps,
         entertainment, and other spending that isn't needed to survive. Take action in minutes.

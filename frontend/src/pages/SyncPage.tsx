@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { syncService } from '../services/syncService';
 import type { SyncDashboard, SyncLogEntry } from '../services/syncService';
 import {
@@ -103,6 +104,7 @@ function PipelineDiagram() {
 }
 
 export function SyncPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [syncMsg, setSyncMsg] = useState('');
 
@@ -128,7 +130,7 @@ export function SyncPage() {
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('sync.title')}>
       <div className="max-w-4xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between">

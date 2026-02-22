@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Spinner } from '../components/ui/Spinner';
+import { useTranslation } from '../i18n/useTranslation';
 import { notificationService } from '../services/notificationService';
 import type { Notification, NotificationSeverity, NotificationType, NotificationPreferences } from '../services/notificationService';
 import {
@@ -147,6 +148,7 @@ function PreferencesPanel({ prefs, onUpdate }: {
 }
 
 export function NotificationsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
@@ -183,13 +185,13 @@ export function NotificationsPage() {
   });
 
   return (
-    <PageWrapper>
+    <PageWrapper title={t('notifications.title')}>
       <div className="max-w-2xl mx-auto space-y-5">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Bell className="w-7 h-7 text-primary" /> Notifications
+                <Bell className="w-7 h-7 text-primary" /> {t('notifications.title')}
               </h1>
               <p className="text-text-secondary text-sm mt-1">
                 Real-time alerts when your AI detects changes that matter.
@@ -207,7 +209,7 @@ export function NotificationsPage() {
                   onClick={() => readAllMut.mutate()}
                   className="px-3 py-2 text-xs border border-slate-700 rounded-lg hover:bg-bg-elevated flex items-center gap-1.5"
                 >
-                  <CheckCheck className="w-3.5 h-3.5" /> Mark all read
+                  <CheckCheck className="w-3.5 h-3.5" /> {t('notifications.markAllRead')}
                 </button>
               )}
             </div>

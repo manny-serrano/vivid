@@ -6,15 +6,17 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Link } from 'react-router-dom';
 import { Rocket } from 'lucide-react';
+import { useTranslation } from '../i18n/useTranslation';
 
 export function DashboardPage() {
   const { data: twin, isLoading, error } = useTwin();
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Spinner />
-        <p className="text-text-secondary text-sm">Loading your Financial Twin...</p>
+        <p className="text-text-secondary text-sm">{t('dashboard.loadingTwin')}</p>
       </div>
     );
   }
@@ -25,12 +27,12 @@ export function DashboardPage() {
         <div className="max-w-md mx-auto mt-16">
           <Card className="text-center">
             <Rocket className="h-12 w-12 text-accent mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No twin yet</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('dashboard.noTwin')}</h2>
             <p className="text-text-secondary text-sm mb-6">
-              Connect your bank account to build your Financial Twin and unlock multi-dimensional insights.
+              {t('dashboard.noTwinDesc')}
             </p>
             <Link to="/onboarding">
-              <Button className="w-full">Get started</Button>
+              <Button className="w-full">{t('dashboard.getStarted')}</Button>
             </Link>
           </Card>
         </div>
@@ -39,7 +41,7 @@ export function DashboardPage() {
   }
 
   return (
-    <PageWrapper title="Your Financial Twin">
+    <PageWrapper title={t('dashboard.title')}>
       <TwinDashboard twin={twin} />
     </PageWrapper>
   );
