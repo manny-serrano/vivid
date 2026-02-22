@@ -21,6 +21,8 @@ import { BadgePage } from './pages/BadgePage';
 import { BadgeVerifyPage } from './pages/BadgeVerifyPage';
 import { StressTestPage } from './pages/StressTestPage';
 import { AnomaliesPage } from './pages/AnomaliesPage';
+import { OptimizePage } from './pages/OptimizePage';
+import { LoanShieldPage } from './pages/LoanShieldPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -67,6 +69,8 @@ function App() {
                 <Route path="/verify/:consentToken" element={<BadgeVerifyPage />} />
                 <Route path="/stress-test" element={<StressTestPage />} />
                 <Route path="/anomalies" element={<AnomaliesPage />} />
+                <Route path="/optimize" element={<OptimizePage />} />
+                <Route path="/loan-shield" element={<LoanShieldPage />} />
               </Routes>
             </main>
           </div>
