@@ -89,3 +89,32 @@ export async function fetchCategoryDrilldown(category: string): Promise<Category
   const { data } = await api.get<CategoryDrilldown>(`/twin/categories/${category}`);
   return data;
 }
+
+// ---------------------------------------------------------------------------
+// Pillar Explainability
+// ---------------------------------------------------------------------------
+
+export interface InfluentialTransaction {
+  date: string;
+  merchantName: string;
+  amount: number;
+  impact: 'positive' | 'negative';
+  reason: string;
+}
+
+export interface PillarExplanation {
+  pillar: string;
+  pillarKey: string;
+  score: number;
+  reasons: string[];
+  influentialTransactions: InfluentialTransaction[];
+}
+
+export interface ExplainabilityReport {
+  pillars: PillarExplanation[];
+}
+
+export async function fetchPillarExplanations(): Promise<ExplainabilityReport> {
+  const { data } = await api.get<ExplainabilityReport>('/twin/explain');
+  return data;
+}

@@ -5,6 +5,7 @@ import { TwinScoreCard } from './TwinScoreCard';
 import { TwinTimeline } from './TwinTimeline';
 import { SpendingBreakdown } from './SpendingBreakdown';
 import { InteractiveNarrative } from './InteractiveNarrative';
+import { PillarExplainability } from './PillarExplainability';
 import { TwinVerificationBadge } from './TwinVerificationBadge';
 import { TwinPDFExport } from './TwinPDFExport';
 import { ScoreMeter } from '../ui/ScoreMeter';
@@ -128,6 +129,9 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
           );
         })}
       </div>
+
+      {/* Pillar Explainability */}
+      <PillarExplainability />
 
       {/* Lending readiness */}
       <motion.div

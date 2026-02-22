@@ -5,6 +5,7 @@ import {
   getSnapshots,
   getTransactionDrilldown,
   getCategoryAggregates,
+  getPillarExplanations,
 } from '../controllers/twin.controller.js';
 import { authPreHandler } from '../middleware/auth.middleware.js';
 
@@ -32,5 +33,10 @@ export async function twinRoutes(app: FastifyInstance): Promise<void> {
   app.get('/categories/:category', {
     preHandler: [authPreHandler],
     handler: getTransactionDrilldown,
+  });
+
+  app.get('/explain', {
+    preHandler: [authPreHandler],
+    handler: getPillarExplanations,
   });
 }
