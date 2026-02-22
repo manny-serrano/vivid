@@ -21,6 +21,7 @@ model User {
   twin                Twin?
   shareTokens         ShareToken[]
 
+  @@index([plaidItemId])
   @@map("users")
 }
 

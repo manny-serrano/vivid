@@ -24,12 +24,17 @@ export async function createLinkToken(
     .split(',')
     .map((c) => c.trim() as CountryCode);
 
+  const webhookUrl = env.NODE_ENV === 'production'
+    ? `${env.FRONTEND_URL.replace(/\/$/, '').replace(':5173', ':3001')}/api/${env.API_VERSION}/plaid/webhook`
+    : undefined;
+
   const request: LinkTokenCreateRequest = {
     user: { client_user_id: userId },
     client_name: 'Vivid',
     products,
     country_codes: countryCodes,
     language: 'en',
+    ...(webhookUrl && { webhook: webhookUrl }),
   };
 
   const response = await plaidClient.linkTokenCreate(request);
