@@ -24,6 +24,7 @@ import { AnomaliesPage } from './pages/AnomaliesPage';
 import { OptimizePage } from './pages/OptimizePage';
 import { LoanShieldPage } from './pages/LoanShieldPage';
 import { TimeMachinePage } from './pages/TimeMachinePage';
+import { RedFlagsPage } from './pages/RedFlagsPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -73,6 +74,7 @@ function App() {
                 <Route path="/optimize" element={<OptimizePage />} />
                 <Route path="/loan-shield" element={<LoanShieldPage />} />
                 <Route path="/time-machine" element={<TimeMachinePage />} />
+                <Route path="/red-flags" element={<RedFlagsPage />} />
               </Routes>
             </main>
           </div>
