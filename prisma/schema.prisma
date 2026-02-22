@@ -187,3 +187,74 @@ model VerifiedBadge {
   @@index([userId])
   @@map("verified_badges")
 }
+
+// ─── Networked Reputation Graph ──────────────────────────────────────────────
+
+model AttestationProvider {
+  id              String              @id @default(cuid())
+  name            String
+  type            AttestationProviderType
+  domain          String              @unique
+  apiKeyHash      String              @unique
+  logoUrl         String?
+  verified        Boolean             @default(false)
+  contactEmail    String?
+  createdAt       DateTime            @default(now())
+  attestations    Attestation[]
+
+  @@map("attestation_providers")
+}
+
+enum AttestationProviderType {
+  EMPLOYER
+  LANDLORD
+  LENDER
+  GIG_PLATFORM
+  PAYROLL_PROVIDER
+  UTILITY
+  GOVERNMENT
+  OTHER
+}
+
+model Attestation {
+  id                  String                @id @default(cuid())
+  userId              String
+  twinId              String
+  providerId          String
+  provider            AttestationProvider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  attestationType     AttestationType
+  claim               String
+  details             String?               @db.Text
+  evidence            String?               @db.Text
+  startDate           DateTime?
+  endDate             DateTime?
+  strength            Int                   @default(50)
+  attestationHash     String                @unique
+  hederaTransactionId String?
+  hederaTimestamp     DateTime?
+  hederaTopicId       String?
+  revokedAt           DateTime?
+  revokedReason       String?
+  expiresAt           DateTime?
+  verificationCount   Int                   @default(0)
+  lastVerifiedAt      DateTime?
+  createdAt           DateTime              @default(now())
+
+  @@index([userId])
+  @@index([twinId])
+  @@index([providerId])
+  @@index([attestationHash])
+  @@map("attestations")
+}
+
+enum AttestationType {
+  VERIFIED_INCOME
+  ON_TIME_RENT
+  EMPLOYMENT_VERIFIED
+  GIG_EARNINGS
+  LOAN_REPAYMENT
+  UTILITY_PAYMENT
+  IDENTITY_VERIFIED
+  REFERENCE
+  CUSTOM
+}
