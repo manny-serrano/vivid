@@ -57,6 +57,9 @@
 - Dark-mode dashboard with radar chart, timeline, score cards, AI narrative
 - Permissioned sharing via UUID share tokens
 - Blockchain verification badge (Hedera)
+- **AI Financial Chatbot** — floating assistant powered by Vertex AI (Gemini), with full access to the user's twin data for personalized, context-aware advice
+- **Dual Voice TTS** — choose between Nova (female, warm) or Atlas (male, analytical); responses are read aloud via the Web Speech API with graceful fallback if unavailable
+- Template-based fallback responses ensure the chatbot works even when Vertex AI is offline
 
 **Institution side**
 
@@ -73,16 +76,20 @@ flowchart TB
   subgraph Frontend
     React[React + Vite]
     FirebaseAuth[Firebase Auth]
+    ChatBot[ChatBot + TTS]
     React --> FirebaseAuth
+    React --> ChatBot
   end
 
   subgraph Backend
     Fastify[Fastify API]
     PlaidAPI[Plaid Service]
     AIPipeline[AI Pipeline]
+    ChatService[Chat Service]
     Hedera[Hedera HCS]
     Fastify --> PlaidAPI
     Fastify --> AIPipeline
+    Fastify --> ChatService
     AIPipeline --> Hedera
   end
 
@@ -98,11 +105,13 @@ flowchart TB
   end
 
   React --> Fastify
+  ChatBot --> Fastify
   Fastify --> PostgreSQL
   Fastify --> Firestore
   PlaidAPI --> PubSub
   PubSub --> AIPipeline
   AIPipeline --> VertexAI
+  ChatService --> VertexAI
   Fastify --> KMS
 ```
 
@@ -112,7 +121,7 @@ flowchart TB
 
 | Layer        | Technology |
 |-------------|------------|
-| Frontend    | React 18, TypeScript, Vite, Tailwind, Zustand, TanStack Query, React Router, Recharts, Framer Motion, Firebase JS SDK, react-plaid-link |
+| Frontend    | React 18, TypeScript, Vite, Tailwind, Zustand, TanStack Query, React Router, Recharts, Framer Motion, Firebase JS SDK, react-plaid-link, Web Speech API (TTS) |
 | Backend     | Node.js 20, Fastify v4, Prisma, Zod, LangChain.js, @google-cloud/vertexai, @hashgraph/sdk, Plaid SDK, firebase-admin |
 | Database    | PostgreSQL 15 (Cloud SQL), Firestore |
 | Infra       | Cloud Run, Firebase Hosting, Pub/Sub, KMS, Secret Manager, Cloud Storage |
@@ -197,6 +206,7 @@ Base URL: `/api/v1`
 | POST | `/share` | Bearer | Create share token |
 | GET | `/share` | Bearer | List share tokens |
 | GET | `/share/access/:token` | — | Access twin by share token (public) |
+| POST | `/chat` | Bearer | Send a chat message; returns AI or template response grounded in user's twin |
 | POST | `/institution/register` | — | Register institution |
 | GET | `/institution/applicant/:token` | Bearer (inst) | View applicant by share token |
 
