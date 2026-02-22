@@ -1,5 +1,16 @@
 import { api } from './api';
 
+export interface TwinTransaction {
+  id: string;
+  date: string;
+  amount: number;
+  merchantName?: string | null;
+  vividCategory: string;
+  isRecurring: boolean;
+  isIncomeDeposit: boolean;
+  confidenceScore: number;
+}
+
 export interface TwinProfile {
   id: string;
   userId: string;
@@ -24,6 +35,7 @@ export interface TwinProfile {
   updatedAt: string;
   transactionCount: number;
   analysisMonths: number;
+  transactions: TwinTransaction[];
 }
 
 export async function fetchTwin(): Promise<TwinProfile> {

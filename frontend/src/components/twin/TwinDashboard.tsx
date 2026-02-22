@@ -108,7 +108,7 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
       </motion.div>
 
       {/* Timeline */}
-      <TwinTimeline />
+      <TwinTimeline transactions={twin.transactions} />
 
       {/* Narrative */}
       <TwinNarrative narrative={twin.consumerNarrative} />
