@@ -341,8 +341,11 @@ export function LandingPage() {
             </span>
             ?
           </h2>
+          <div className="flex justify-center mb-6">
+            <img src="/vivid-logo.png" alt="Vivid" className="h-60 w-60 rounded-full object-cover shadow-lg shadow-violet-500/30" />
+          </div>
           <p className="text-text-secondary mb-8">
-            Built for LIVE AI Ivy Plus 2026 — powered by BankSocial &amp; Hedera Hashgraph.
+            AI-powered financial identity you own, control, and share on your terms.
           </p>
           <div className="flex gap-4 justify-center">
             <Link to="/onboarding">
