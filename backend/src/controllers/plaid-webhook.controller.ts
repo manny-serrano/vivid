@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/database.js';
 import { publishTwinGeneration } from '../services/pubsub.service.js';
+import { createSyncLog, updateSyncStatus } from '../services/sync.service.js';
 import { logger } from '../utils/logger.js';
 
 interface PlaidWebhookBody {
@@ -48,13 +49,31 @@ export async function handlePlaidWebhook(
     return;
   }
 
+  const logId = await createSyncLog({
+    userId: user.id,
+    itemId: item_id,
+    webhookType: webhook_type,
+    webhookCode: webhook_code,
+    newCount: request.body.new_transactions ?? 0,
+    removedCount: request.body.removed_transactions?.length ?? 0,
+  });
+
   logger.info('[plaid-webhook] Triggering twin regeneration', {
     userId: user.id,
     webhook_code,
     newTransactions: request.body.new_transactions,
   });
 
-  await publishTwinGeneration(user.id);
+  await updateSyncStatus(logId, 'PROCESSING');
+
+  try {
+    await publishTwinGeneration(user.id);
+    await updateSyncStatus(logId, 'COMPLETED');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    await updateSyncStatus(logId, 'FAILED', msg);
+    logger.error('[plaid-webhook] Twin regeneration failed', { userId: user.id, error: msg });
+  }
 
   await reply.send({ received: true, regenerating: true });
 }

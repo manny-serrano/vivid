@@ -13,6 +13,9 @@ import { timeMachineRoutes } from './timeMachine.routes.js';
 import { redFlagsRoutes } from './redFlags.routes.js';
 import { attestationRoutes } from './attestation.routes.js';
 import { widgetRoutes } from './widget.routes.js';
+import { goalsRoutes } from './goals.routes.js';
+import { syncRoutes } from './sync.routes.js';
+import { partnerRoutes } from './partner.routes.js';
 import { env } from '../config/env.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
@@ -31,4 +34,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(redFlagsRoutes, { prefix: `${prefix}/red-flags` });
   await app.register(attestationRoutes, { prefix: `${prefix}/attestations` });
   await app.register(widgetRoutes, { prefix: `${prefix}/widget` });
+  await app.register(goalsRoutes, { prefix: `${prefix}/goals` });
+  await app.register(syncRoutes, { prefix: `${prefix}/sync` });
+  await app.register(partnerRoutes, { prefix: `${prefix}/partners` });
 }

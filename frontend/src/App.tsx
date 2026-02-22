@@ -28,6 +28,9 @@ import { RedFlagsPage } from './pages/RedFlagsPage';
 import { ReputationPage } from './pages/ReputationPage';
 import { WidgetPage } from './pages/WidgetPage';
 import { WidgetEmbedPage } from './pages/WidgetEmbedPage';
+import { GoalsPage } from './pages/GoalsPage';
+import { SyncPage } from './pages/SyncPage';
+import { PartnerDashboardPage } from './pages/PartnerDashboardPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -81,6 +84,9 @@ function App() {
                 <Route path="/reputation" element={<ReputationPage />} />
                 <Route path="/widgets" element={<WidgetPage />} />
                 <Route path="/widget/embed" element={<WidgetEmbedPage />} />
+                <Route path="/goals" element={<GoalsPage />} />
+                <Route path="/sync" element={<SyncPage />} />
+                <Route path="/partner" element={<PartnerDashboardPage />} />
               </Routes>
             </main>
           </div>

@@ -324,3 +324,114 @@ enum WidgetSessionStatus {
   EXPIRED
   DENIED
 }
+
+// ─── Goals & Milestones ──────────────────────────────────────────────────────
+
+model Goal {
+  id              String        @id @default(cuid())
+  userId          String
+  title           String
+  description     String?
+  category        GoalCategory
+  targetValue     Float
+  currentValue    Float         @default(0)
+  unit            String        @default("dollars")
+  targetDate      DateTime
+  status          GoalStatus    @default(ACTIVE)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  completedAt     DateTime?
+  milestones      Milestone[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("goals")
+}
+
+enum GoalCategory {
+  SAVINGS
+  DEBT_PAYOFF
+  EMERGENCY_FUND
+  SCORE_IMPROVEMENT
+  MORTGAGE_READY
+  SPENDING_REDUCTION
+  INCOME_GROWTH
+  CUSTOM
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  ABANDONED
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  goalId      String
+  goal        Goal            @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  title       String
+  targetValue Float
+  reached     Boolean         @default(false)
+  reachedAt   DateTime?
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+
+  @@index([goalId])
+  @@map("milestones")
+}
+
+// ─── Plaid Continuous Sync ───────────────────────────────────────────────────
+
+model PlaidSyncLog {
+  id            String          @id @default(cuid())
+  userId        String
+  itemId        String
+  webhookType   String
+  webhookCode   String
+  newCount      Int             @default(0)
+  removedCount  Int             @default(0)
+  status        SyncStatus      @default(RECEIVED)
+  errorMessage  String?
+  processedAt   DateTime?
+  createdAt     DateTime        @default(now())
+
+  @@index([userId])
+  @@index([itemId])
+  @@map("plaid_sync_logs")
+}
+
+enum SyncStatus {
+  RECEIVED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ─── Partner Dashboard ───────────────────────────────────────────────────────
+
+model Partner {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  companyName     String
+  companyDomain   String
+  industry        String
+  contactEmail    String
+  apiKeyHash      String          @unique
+  tier            PartnerTier     @default(FREE)
+  active          Boolean         @default(true)
+  totalApiCalls   Int             @default(0)
+  lastApiCallAt   DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([apiKeyHash])
+  @@map("partners")
+}
+
+enum PartnerTier {
+  FREE
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
