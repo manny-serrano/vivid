@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { RefreshCw } from 'lucide-react';
 import { TwinRadarChart } from './TwinRadarChart';
 import { TwinScoreCard } from './TwinScoreCard';
 import { TwinTimeline } from './TwinTimeline';
@@ -10,8 +12,9 @@ import { TwinVerificationBadge } from './TwinVerificationBadge';
 import { TwinPDFExport } from './TwinPDFExport';
 import { ScoreMeter } from '../ui/ScoreMeter';
 import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import type { TwinProfile } from '../../services/twinService';
-import { fetchSnapshots, fetchCategoryAggregates } from '../../services/twinService';
+import { fetchSnapshots, fetchCategoryAggregates, regenerateTwin } from '../../services/twinService';
 import { RADAR_COLORS } from '../../utils/chartHelpers';
 
 interface TwinDashboardProps {
@@ -34,6 +37,26 @@ const LOAN_TYPES = [
 ] as const;
 
 export function TwinDashboard({ twin }: TwinDashboardProps) {
+  const queryClient = useQueryClient();
+  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+
+  const refreshMutation = useMutation({
+    mutationFn: regenerateTwin,
+    onSuccess: () => {
+      setRefreshMsg('Twin is regenerating — this may take a moment...');
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['twin'] });
+        queryClient.invalidateQueries({ queryKey: ['twin-snapshots'] });
+        queryClient.invalidateQueries({ queryKey: ['category-aggregates'] });
+        setRefreshMsg(null);
+      }, 5000);
+    },
+    onError: () => {
+      setRefreshMsg('Failed to refresh. Please try again.');
+      setTimeout(() => setRefreshMsg(null), 4000);
+    },
+  });
+
   const { data: snapshots } = useQuery({
     queryKey: ['twin-snapshots'],
     queryFn: fetchSnapshots,
@@ -78,9 +101,28 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
           <span className="text-sm text-text-secondary">
             {twin.transactionCount} transactions &middot; {twin.analysisMonths} months
           </span>
+          <Button
+            variant="secondary"
+            onClick={() => refreshMutation.mutate()}
+            disabled={refreshMutation.isPending}
+            className="flex items-center gap-2 text-sm"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+            {refreshMutation.isPending ? 'Refreshing...' : 'Refresh Twin'}
+          </Button>
           <TwinPDFExport />
         </div>
       </div>
+
+      {refreshMsg && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl bg-primary/10 border border-primary/30 px-4 py-3 text-sm text-primary"
+        >
+          {refreshMsg}
+        </motion.div>
+      )}
 
       {/* Score + Radar side-by-side on desktop */}
       <div className="grid lg:grid-cols-3 gap-6">

@@ -75,6 +75,11 @@ export async function fetchTwin(): Promise<TwinProfile> {
   return data;
 }
 
+export async function regenerateTwin(): Promise<{ success: boolean; message: string }> {
+  const { data } = await api.post<{ success: boolean; message: string }>('/twin/regenerate');
+  return data;
+}
+
 export async function fetchSnapshots(): Promise<TwinSnapshot[]> {
   const { data } = await api.get<TwinSnapshot[]>('/twin/snapshots');
   return data;
