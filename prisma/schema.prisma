@@ -258,3 +258,68 @@ enum AttestationType {
   REFERENCE
   CUSTOM
 }
+
+// ─── Embedded Vivid Widget ───────────────────────────────────────────────────
+
+model WidgetConfig {
+  id                String          @id @default(cuid())
+  partnerId         String
+  partnerName       String
+  partnerDomain     String
+  apiKeyHash        String          @unique
+  template          WidgetTemplate
+  allowedOrigins    String[]
+  brandColor        String          @default("#8b5cf6")
+  logoUrl           String?
+  scopes            String[]
+  callbackUrl       String?
+  webhookUrl        String?
+  active            Boolean         @default(true)
+  totalSessions     Int             @default(0)
+  totalConversions  Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  sessions          WidgetSession[]
+
+  @@index([apiKeyHash])
+  @@index([partnerId])
+  @@map("widget_configs")
+}
+
+enum WidgetTemplate {
+  LENDING
+  RENTAL
+  GIG_HIRING
+  CHECKOUT
+  GENERIC
+}
+
+model WidgetSession {
+  id              String              @id @default(cuid())
+  widgetId        String
+  widget          WidgetConfig        @relation(fields: [widgetId], references: [id], onDelete: Cascade)
+  userId          String?
+  sessionToken    String              @unique @default(uuid())
+  status          WidgetSessionStatus @default(PENDING)
+  consentedScopes String[]
+  resultData      String?             @db.Text
+  origin          String?
+  userAgent       String?
+  ipHash          String?
+  expiresAt       DateTime
+  completedAt     DateTime?
+  createdAt       DateTime            @default(now())
+
+  @@index([sessionToken])
+  @@index([widgetId])
+  @@index([userId])
+  @@map("widget_sessions")
+}
+
+enum WidgetSessionStatus {
+  PENDING
+  CONSENTED
+  COMPLETED
+  EXPIRED
+  DENIED
+}

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck, Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network } from 'lucide-react';
+import { LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck, Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network, Code2 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
 const NAV_ITEMS = [
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/share', label: 'Share with Lenders', icon: Share2 },
   { to: '/zkp', label: 'ZK Proofs', icon: ShieldCheck },
   { to: '/reputation', label: 'Reputation Graph', icon: Network },
+  { to: '/widgets', label: 'Embed Widget', icon: Code2 },
   { to: '/badges', label: 'Verified Badge', icon: BadgeCheck },
   { to: '/institution', label: 'Institution', icon: Building2 },
 ];

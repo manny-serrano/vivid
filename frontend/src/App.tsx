@@ -26,6 +26,8 @@ import { LoanShieldPage } from './pages/LoanShieldPage';
 import { TimeMachinePage } from './pages/TimeMachinePage';
 import { RedFlagsPage } from './pages/RedFlagsPage';
 import { ReputationPage } from './pages/ReputationPage';
+import { WidgetPage } from './pages/WidgetPage';
+import { WidgetEmbedPage } from './pages/WidgetEmbedPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -77,6 +79,8 @@ function App() {
                 <Route path="/time-machine" element={<TimeMachinePage />} />
                 <Route path="/red-flags" element={<RedFlagsPage />} />
                 <Route path="/reputation" element={<ReputationPage />} />
+                <Route path="/widgets" element={<WidgetPage />} />
+                <Route path="/widget/embed" element={<WidgetEmbedPage />} />
               </Routes>
             </main>
           </div>
