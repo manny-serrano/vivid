@@ -133,6 +133,21 @@ enum InstitutionType {
   OTHER
 }
 
+model TwinSnapshot {
+  id                       String   @id @default(cuid())
+  userId                   String
+  incomeStabilityScore     Float
+  spendingDisciplineScore  Float
+  debtTrajectoryScore      Float
+  financialResilienceScore Float
+  growthMomentumScore      Float
+  overallScore             Float
+  snapshotAt               DateTime @default(now())
+
+  @@index([userId, snapshotAt])
+  @@map("twin_snapshots")
+}
+
 model ZkpClaim {
   id                  String    @id @default(cuid())
   userId              String

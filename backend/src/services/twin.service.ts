@@ -166,6 +166,22 @@ async function persistTwin(
       await tx.twin.delete({ where: { userId } });
     }
 
+    // Save a historical snapshot before replacing the twin
+    if (existingTwin) {
+      await tx.twinSnapshot.create({
+        data: {
+          userId,
+          incomeStabilityScore: existingTwin.incomeStabilityScore,
+          spendingDisciplineScore: existingTwin.spendingDisciplineScore,
+          debtTrajectoryScore: existingTwin.debtTrajectoryScore,
+          financialResilienceScore: existingTwin.financialResilienceScore,
+          growthMomentumScore: existingTwin.growthMomentumScore,
+          overallScore: existingTwin.overallScore,
+          snapshotAt: existingTwin.generatedAt,
+        },
+      });
+    }
+
     const twin = await tx.twin.create({
       data: {
         userId,

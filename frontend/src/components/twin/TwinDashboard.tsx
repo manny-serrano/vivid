@@ -1,14 +1,16 @@
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { TwinRadarChart } from './TwinRadarChart';
 import { TwinScoreCard } from './TwinScoreCard';
 import { TwinTimeline } from './TwinTimeline';
 import { SpendingBreakdown } from './SpendingBreakdown';
-import { TwinNarrative } from './TwinNarrative';
+import { InteractiveNarrative } from './InteractiveNarrative';
 import { TwinVerificationBadge } from './TwinVerificationBadge';
 import { TwinPDFExport } from './TwinPDFExport';
 import { ScoreMeter } from '../ui/ScoreMeter';
 import { Card } from '../ui/Card';
 import type { TwinProfile } from '../../services/twinService';
+import { fetchSnapshots, fetchCategoryAggregates } from '../../services/twinService';
 import { RADAR_COLORS } from '../../utils/chartHelpers';
 
 interface TwinDashboardProps {
@@ -31,11 +33,37 @@ const LOAN_TYPES = [
 ] as const;
 
 export function TwinDashboard({ twin }: TwinDashboardProps) {
+  const { data: snapshots } = useQuery({
+    queryKey: ['twin-snapshots'],
+    queryFn: fetchSnapshots,
+  });
+
+  const { data: categoryAggregates } = useQuery({
+    queryKey: ['category-aggregates'],
+    queryFn: fetchCategoryAggregates,
+  });
+
   const dimensions = DIMENSIONS.map((d) => ({
     key: d.key,
     label: d.label,
     score: twin[d.key] as number,
   }));
+
+  const previousSnapshot = snapshots && snapshots.length > 0
+    ? snapshots[snapshots.length - 1]
+    : null;
+
+  const ghostDimensions = previousSnapshot
+    ? DIMENSIONS.map((d) => ({
+        key: d.key,
+        label: d.label,
+        score: previousSnapshot[d.key] as number,
+      }))
+    : undefined;
+
+  const ghostLabel = previousSnapshot
+    ? `Previous (${new Date(previousSnapshot.snapshotAt).toLocaleDateString()})`
+    : undefined;
 
   return (
     <div className="space-y-8">
@@ -57,32 +85,48 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
       <div className="grid lg:grid-cols-3 gap-6">
         <TwinScoreCard score={twin.overallScore} />
         <div className="lg:col-span-2">
-          <TwinRadarChart dimensions={dimensions} />
+          <TwinRadarChart
+            dimensions={dimensions}
+            ghostDimensions={ghostDimensions}
+            ghostLabel={ghostLabel}
+          />
         </div>
       </div>
 
       {/* Individual dimension cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {dimensions.map((d, i) => (
-          <motion.div
-            key={d.key}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i, duration: 0.4 }}
-          >
-            <Card className="h-full">
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className="h-2.5 w-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: RADAR_COLORS[d.key] ?? '#94A3B8' }}
-                />
-                <span className="text-sm font-medium text-text-secondary">{d.label}</span>
-              </div>
-              <p className="text-3xl font-bold">{Math.round(d.score)}</p>
-              <ScoreMeter score={d.score} showLabel={false} className="mt-3" />
-            </Card>
-          </motion.div>
-        ))}
+        {dimensions.map((d, i) => {
+          const prev = previousSnapshot ? (previousSnapshot as Record<string, unknown>)[d.key] as number : null;
+          const delta = prev != null ? d.score - prev : null;
+
+          return (
+            <motion.div
+              key={d.key}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * i, duration: 0.4 }}
+            >
+              <Card className="h-full">
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: RADAR_COLORS[d.key] ?? '#94A3B8' }}
+                  />
+                  <span className="text-sm font-medium text-text-secondary">{d.label}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold">{Math.round(d.score)}</p>
+                  {delta != null && delta !== 0 && (
+                    <span className={`text-sm font-medium ${delta > 0 ? 'text-success' : 'text-danger'}`}>
+                      {delta > 0 ? '+' : ''}{Math.round(delta)}
+                    </span>
+                  )}
+                </div>
+                <ScoreMeter score={d.score} showLabel={false} className="mt-3" />
+              </Card>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Lending readiness */}
@@ -114,8 +158,11 @@ export function TwinDashboard({ twin }: TwinDashboardProps) {
         <SpendingBreakdown transactions={twin.transactions} />
       </div>
 
-      {/* Narrative */}
-      <TwinNarrative narrative={twin.consumerNarrative} />
+      {/* Interactive Narrative */}
+      <InteractiveNarrative
+        narrative={twin.consumerNarrative}
+        categories={categoryAggregates ?? []}
+      />
     </div>
   );
 }
