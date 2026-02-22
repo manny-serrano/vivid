@@ -20,7 +20,7 @@ export function ShareViewPage() {
 
   const d = data as Record<string, unknown>;
   const readiness = (d.lendingReadiness as Record<string, number>) ?? {};
-  const proof = d.blockchainProof as { verified?: boolean; profileHash?: string; hederaTransactionId?: string } | undefined;
+  const proof = d.blockchainProof as { blockchainVerified?: boolean; profileHash?: string; hederaTransactionId?: string } | undefined;
 
   return (
     <div className="max-w-3xl mx-auto p-8 space-y-8">
@@ -34,7 +34,7 @@ export function ShareViewPage() {
       {Object.keys(readiness).length > 0 && <LendingReadiness readiness={readiness} />}
       {proof && (
         <VerificationPanel
-          verified={!!proof.verified}
+          verified={!!proof.blockchainVerified}
           profileHash={proof.profileHash}
           hederaTransactionId={proof.hederaTransactionId}
         />

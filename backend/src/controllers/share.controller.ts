@@ -108,5 +108,5 @@ export async function accessByToken(
 ): Promise<void> {
   const data = await accessShareToken(request.params.token);
   if (!data) throw new NotFoundError('Share link invalid or expired');
-  await reply.send(data);
+  await reply.send(data.twinData);
 }
