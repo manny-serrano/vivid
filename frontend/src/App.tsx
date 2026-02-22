@@ -35,6 +35,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { IdentityPage } from './pages/IdentityPage';
 import { BenchmarkPage } from './pages/BenchmarkPage';
 import { NegotiatePage } from './pages/NegotiatePage';
+import { WrappedPage } from './pages/WrappedPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -61,44 +62,54 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <Navbar />
-          <div className="flex">
-            <Sidebar />
-            <main className="flex-1 p-8">
-              <Routes>
-                <Route path="/" element={<SmartLanding />} />
-                <Route path="/login" element={<SmartLogin />} />
-                <Route path="/onboarding" element={<SmartOnboarding />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/twin" element={<TwinProfilePage />} />
-                <Route path="/share" element={<SharePage />} />
-                <Route path="/share/:token" element={<ShareViewPage />} />
-                <Route path="/institution/login" element={<InstitutionLoginPage />} />
-                <Route path="/institution" element={<InstitutionDashboardPage />} />
-                <Route path="/zkp" element={<ZkpPage />} />
-                <Route path="/zkp/verify/:proofHash" element={<ZkpVerifyPage />} />
-                <Route path="/badges" element={<BadgePage />} />
-                <Route path="/verify/:consentToken" element={<BadgeVerifyPage />} />
-                <Route path="/stress-test" element={<StressTestPage />} />
-                <Route path="/anomalies" element={<AnomaliesPage />} />
-                <Route path="/optimize" element={<OptimizePage />} />
-                <Route path="/loan-shield" element={<LoanShieldPage />} />
-                <Route path="/time-machine" element={<TimeMachinePage />} />
-                <Route path="/red-flags" element={<RedFlagsPage />} />
-                <Route path="/reputation" element={<ReputationPage />} />
-                <Route path="/widgets" element={<WidgetPage />} />
-                <Route path="/widget/embed" element={<WidgetEmbedPage />} />
-                <Route path="/goals" element={<GoalsPage />} />
-                <Route path="/sync" element={<SyncPage />} />
-                <Route path="/partner" element={<PartnerDashboardPage />} />
-                <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/identity" element={<IdentityPage />} />
-                <Route path="/benchmark" element={<BenchmarkPage />} />
-                <Route path="/negotiate" element={<NegotiatePage />} />
-              </Routes>
-            </main>
-          </div>
-          <ChatBot />
+          <Routes>
+            <Route path="/wrapped" element={<WrappedPage />} />
+            <Route
+              path="*"
+              element={
+                <>
+                  <Navbar />
+                  <div className="flex">
+                    <Sidebar />
+                    <main className="flex-1 p-8">
+                      <Routes>
+                        <Route path="/" element={<SmartLanding />} />
+                        <Route path="/login" element={<SmartLogin />} />
+                        <Route path="/onboarding" element={<SmartOnboarding />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/twin" element={<TwinProfilePage />} />
+                        <Route path="/share" element={<SharePage />} />
+                        <Route path="/share/:token" element={<ShareViewPage />} />
+                        <Route path="/institution/login" element={<InstitutionLoginPage />} />
+                        <Route path="/institution" element={<InstitutionDashboardPage />} />
+                        <Route path="/zkp" element={<ZkpPage />} />
+                        <Route path="/zkp/verify/:proofHash" element={<ZkpVerifyPage />} />
+                        <Route path="/badges" element={<BadgePage />} />
+                        <Route path="/verify/:consentToken" element={<BadgeVerifyPage />} />
+                        <Route path="/stress-test" element={<StressTestPage />} />
+                        <Route path="/anomalies" element={<AnomaliesPage />} />
+                        <Route path="/optimize" element={<OptimizePage />} />
+                        <Route path="/loan-shield" element={<LoanShieldPage />} />
+                        <Route path="/time-machine" element={<TimeMachinePage />} />
+                        <Route path="/red-flags" element={<RedFlagsPage />} />
+                        <Route path="/reputation" element={<ReputationPage />} />
+                        <Route path="/widgets" element={<WidgetPage />} />
+                        <Route path="/widget/embed" element={<WidgetEmbedPage />} />
+                        <Route path="/goals" element={<GoalsPage />} />
+                        <Route path="/sync" element={<SyncPage />} />
+                        <Route path="/partner" element={<PartnerDashboardPage />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
+                        <Route path="/identity" element={<IdentityPage />} />
+                        <Route path="/benchmark" element={<BenchmarkPage />} />
+                        <Route path="/negotiate" element={<NegotiatePage />} />
+                      </Routes>
+                    </main>
+                  </div>
+                  <ChatBot />
+                </>
+              }
+            />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

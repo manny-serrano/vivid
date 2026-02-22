@@ -4,7 +4,7 @@ import {
   LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck,
   Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network,
   Code2, Target, RefreshCw, Briefcase, ChevronDown, Fingerprint, BarChart3,
-  MessageSquareDashed,
+  MessageSquareDashed, Gift,
 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
@@ -25,6 +25,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Overview',
     defaultOpen: true,
     items: [
+      { to: '/wrapped', label: 'Vivid Wrapped', icon: Gift },
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/twin', label: 'My Twin', icon: User },
       { to: '/identity', label: 'My Identity', icon: Fingerprint },
