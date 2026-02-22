@@ -184,70 +184,6 @@ flowchart TB
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20 LTS
-- Docker (for local PostgreSQL)
-- Firebase project
-- (Optional) GCP project, Plaid sandbox, Hedera testnet account
-
-### Clone and install
-
-```bash
-git clone <repo-url>
-cd vivid
-npm install
-```
-
-### Environment setup
-
-Copy `.env.example` to `.env` and set variables. Key ones:
-
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string (e.g. `postgresql://vivid:password@localhost:5432/vivid_dev`) |
-| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Firebase Admin SDK (server) |
-| `VITE_FIREBASE_*` | Firebase client config for the frontend |
-| `PLAID_CLIENT_ID`, `PLAID_SECRET`, `PLAID_ENV=sandbox` | Plaid sandbox |
-| `HEDERA_ACCOUNT_ID`, `HEDERA_PRIVATE_KEY`, `HEDERA_TOPIC_ID` | Hedera testnet (optional for local dev) |
-| `GCP_PROJECT_ID`, `VERTEX_AI_LOCATION`, `VERTEX_AI_MODEL` | Vertex AI (Gemini) |
-
-### Database setup
-
-```bash
-docker-compose up -d
-npx prisma migrate dev --schema=prisma/schema.prisma
-npx prisma db seed
-```
-
-### Run locally
-
-```bash
-npm run dev
-```
-
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3001
-- Health: http://localhost:3001/health
-
----
-
-## Demo Accounts
-
-After seeding:
-
-- **Marcus** (Vivid 74): Gig worker, strong discipline, no credit card — FICO would undersell him.
-- **Sarah** (Vivid 61): Salaried, high spend, no buffer — FICO oversells her.
-
-Share links (no auth required):
-
-- Marcus: `http://localhost:5173/share/00000000-0000-4000-8000-000000000001`
-- Sarah: `http://localhost:5173/share/00000000-0000-4000-8000-000000000002`
-
----
-
 ## API Reference
 
 Base URL: `/api/v1`
@@ -309,7 +245,7 @@ Base URL: `/api/v1`
 
 ## Team
 
-Manny Serrano and Kevin Benitez
+Manny Serrano and Kevin Benitez, Duke University ’27
 
 ---
 
