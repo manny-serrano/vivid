@@ -4,6 +4,7 @@ import {
   LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck,
   Zap, AlertTriangle, Scissors, Shield, Clock, ShieldAlert, Network,
   Code2, Target, RefreshCw, Briefcase, ChevronDown, Fingerprint, BarChart3,
+  MessageSquareDashed,
 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
@@ -41,6 +42,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: '/loan-shield', label: 'Loan Shield', icon: Shield },
       { to: '/stress-test', label: 'Stress Test', icon: Zap },
       { to: '/anomalies', label: 'Anomalies', icon: AlertTriangle },
+      { to: '/negotiate', label: 'Bill Negotiator', icon: MessageSquareDashed },
     ],
   },
   {

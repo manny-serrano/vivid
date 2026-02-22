@@ -19,6 +19,7 @@ import { partnerRoutes } from './partner.routes.js';
 import { notificationRoutes } from './notification.routes.js';
 import { identityRoutes } from './identity.routes.js';
 import { benchmarkRoutes } from './benchmark.routes.js';
+import { negotiateRoutes } from './negotiate.routes.js';
 import { env } from '../config/env.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
@@ -43,4 +44,5 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(notificationRoutes, { prefix: `${prefix}/notifications` });
   await app.register(identityRoutes, { prefix: `${prefix}/identity` });
   await app.register(benchmarkRoutes, { prefix: `${prefix}/benchmark` });
+  await app.register(negotiateRoutes, { prefix: `${prefix}/negotiate` });
 }
