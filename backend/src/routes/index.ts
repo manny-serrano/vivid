@@ -7,6 +7,7 @@ import { institutionRoutes } from './institution.routes.js';
 import { chatRoutes } from './chat.routes.js';
 import { zkpRoutes } from './zkp.routes.js';
 import { badgeRoutes } from './badge.routes.js';
+import { insightsRoutes } from './insights.routes.js';
 import { env } from '../config/env.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
@@ -19,4 +20,5 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(chatRoutes, { prefix: `${prefix}/chat` });
   await app.register(zkpRoutes, { prefix: `${prefix}/zkp` });
   await app.register(badgeRoutes, { prefix: `${prefix}/verify` });
+  await app.register(insightsRoutes, { prefix: `${prefix}/insights` });
 }

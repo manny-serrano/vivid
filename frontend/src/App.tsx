@@ -19,6 +19,8 @@ import { ZkpPage } from './pages/ZkpPage';
 import { ZkpVerifyPage } from './pages/ZkpVerifyPage';
 import { BadgePage } from './pages/BadgePage';
 import { BadgeVerifyPage } from './pages/BadgeVerifyPage';
+import { StressTestPage } from './pages/StressTestPage';
+import { AnomaliesPage } from './pages/AnomaliesPage';
 
 function SmartLanding() {
   const user = useAuthStore((s) => s.user);
@@ -63,6 +65,8 @@ function App() {
                 <Route path="/zkp/verify/:proofHash" element={<ZkpVerifyPage />} />
                 <Route path="/badges" element={<BadgePage />} />
                 <Route path="/verify/:consentToken" element={<BadgeVerifyPage />} />
+                <Route path="/stress-test" element={<StressTestPage />} />
+                <Route path="/anomalies" element={<AnomaliesPage />} />
               </Routes>
             </main>
           </div>
