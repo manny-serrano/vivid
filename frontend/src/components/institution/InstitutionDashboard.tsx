@@ -24,12 +24,11 @@ export function InstitutionDashboard() {
     if (tokenInput.trim()) setActiveToken(tokenInput.trim());
   };
 
-  const d = data as Record<string, unknown> | undefined;
-  const twinData = (d?.twinData as Record<string, unknown>) ?? {};
+  const twinData = (data as Record<string, unknown>) ?? {};
   const scores = (twinData.scores as Record<string, number>) ?? {};
   const readiness = (twinData.lendingReadiness as Record<string, number>) ?? {};
   const proof = twinData.blockchainProof as
-    | { verified?: boolean; profileHash?: string; hederaTransactionId?: string }
+    | { blockchainVerified?: boolean; profileHash?: string; hederaTransactionId?: string }
     | undefined;
 
   return (
@@ -61,7 +60,7 @@ export function InstitutionDashboard() {
         </Card>
       )}
 
-      {d && !isLoading && (
+      {data && !isLoading && (
         <div className="space-y-6">
           {twinData.overallScore != null && (
             <Card>
@@ -81,7 +80,7 @@ export function InstitutionDashboard() {
           )}
           {proof && (
             <VerificationPanel
-              verified={!!proof.verified}
+              verified={!!proof.blockchainVerified}
               profileHash={proof.profileHash}
               hederaTransactionId={proof.hederaTransactionId}
             />

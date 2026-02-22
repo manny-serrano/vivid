@@ -18,7 +18,9 @@ export async function errorHandler(
     return;
   }
 
-  logger.error('Unhandled error', { err: error });
+  logger.error('Unhandled error', {
+    err: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+  });
   await reply.status(500).send({
     error: 'INTERNAL_ERROR',
     message: 'An unexpected error occurred',

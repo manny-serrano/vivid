@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { to: '/loan-shield', label: 'Loan Shield', icon: Shield },
   { to: '/stress-test', label: 'Stress Test', icon: Zap },
   { to: '/anomalies', label: 'Anomalies', icon: AlertTriangle },
-  { to: '/share', label: 'Share', icon: Share2 },
+  { to: '/share', label: 'Share with Lenders', icon: Share2 },
   { to: '/zkp', label: 'ZK Proofs', icon: ShieldCheck },
   { to: '/badges', label: 'Verified Badge', icon: BadgeCheck },
   { to: '/institution', label: 'Institution', icon: Building2 },
