@@ -9,6 +9,7 @@ import { zkpRoutes } from './zkp.routes.js';
 import { badgeRoutes } from './badge.routes.js';
 import { insightsRoutes } from './insights.routes.js';
 import { optimizerRoutes } from './optimizer.routes.js';
+import { timeMachineRoutes } from './timeMachine.routes.js';
 import { env } from '../config/env.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
@@ -23,4 +24,5 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(badgeRoutes, { prefix: `${prefix}/verify` });
   await app.register(insightsRoutes, { prefix: `${prefix}/insights` });
   await app.register(optimizerRoutes, { prefix: `${prefix}/optimize` });
+  await app.register(timeMachineRoutes, { prefix: `${prefix}/time-machine` });
 }

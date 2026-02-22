@@ -1,10 +1,11 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck, Zap, AlertTriangle, Scissors, Shield } from 'lucide-react';
+import { LayoutDashboard, User, Share2, Building2, ShieldCheck, BadgeCheck, Zap, AlertTriangle, Scissors, Shield, Clock } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/twin', label: 'My Twin', icon: User },
+  { to: '/time-machine', label: 'Time Machine', icon: Clock },
   { to: '/optimize', label: 'Optimize Spend', icon: Scissors },
   { to: '/loan-shield', label: 'Loan Shield', icon: Shield },
   { to: '/stress-test', label: 'Stress Test', icon: Zap },
