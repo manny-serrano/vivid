@@ -495,4 +495,5 @@ Manny Serrano and Kevin Benitez, Duke University '27
 
 ## License
 
-MIT
+Proprietary License — All Rights Reserved
+
