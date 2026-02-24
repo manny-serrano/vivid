@@ -282,11 +282,37 @@ async function main() {
     },
   });
 
+  // Attestation Providers
+  await prisma.attestationProvider.deleteMany();
+
+  const providerData = [
+    { name: 'Uber', type: 'GIG_PLATFORM' as const, domain: 'uber.com', verified: true, apiKeyHash: `seed-key-uber-${id()}`, contactEmail: 'partners@uber.com' },
+    { name: 'Lyft', type: 'GIG_PLATFORM' as const, domain: 'lyft.com', verified: true, apiKeyHash: `seed-key-lyft-${id()}`, contactEmail: 'partners@lyft.com' },
+    { name: 'DoorDash', type: 'GIG_PLATFORM' as const, domain: 'doordash.com', verified: true, apiKeyHash: `seed-key-doordash-${id()}`, contactEmail: 'partners@doordash.com' },
+    { name: 'Instacart', type: 'GIG_PLATFORM' as const, domain: 'instacart.com', verified: false, apiKeyHash: `seed-key-instacart-${id()}`, contactEmail: 'partners@instacart.com' },
+    { name: 'TaskRabbit', type: 'GIG_PLATFORM' as const, domain: 'taskrabbit.com', verified: true, apiKeyHash: `seed-key-taskrabbit-${id()}`, contactEmail: 'partners@taskrabbit.com' },
+    { name: 'Stripe', type: 'PAYROLL_PROVIDER' as const, domain: 'stripe.com', verified: true, apiKeyHash: `seed-key-stripe-${id()}`, contactEmail: 'partners@stripe.com' },
+    { name: 'Gusto', type: 'PAYROLL_PROVIDER' as const, domain: 'gusto.com', verified: true, apiKeyHash: `seed-key-gusto-${id()}`, contactEmail: 'partners@gusto.com' },
+    { name: 'ADP', type: 'PAYROLL_PROVIDER' as const, domain: 'adp.com', verified: true, apiKeyHash: `seed-key-adp-${id()}`, contactEmail: 'partners@adp.com' },
+    { name: 'Acme Corp', type: 'EMPLOYER' as const, domain: 'acmecorp.com', verified: false, apiKeyHash: `seed-key-acme-${id()}`, contactEmail: 'hr@acmecorp.com' },
+    { name: 'Sunrise Credit Union', type: 'LENDER' as const, domain: 'sunrise-cu.org', verified: true, apiKeyHash: `seed-key-sunrise-${id()}`, contactEmail: 'lo@sunrise-cu.org' },
+    { name: 'Community First Bank', type: 'LENDER' as const, domain: 'communityfirstbank.com', verified: false, apiKeyHash: `seed-key-cfb-${id()}`, contactEmail: 'lending@communityfirstbank.com' },
+    { name: 'EquityHomes Property Mgmt', type: 'LANDLORD' as const, domain: 'equityhomes.com', verified: true, apiKeyHash: `seed-key-equity-${id()}`, contactEmail: 'verify@equityhomes.com' },
+    { name: 'Greystar Real Estate', type: 'LANDLORD' as const, domain: 'greystar.com', verified: true, apiKeyHash: `seed-key-greystar-${id()}`, contactEmail: 'verify@greystar.com' },
+    { name: 'Duke Energy', type: 'UTILITY' as const, domain: 'duke-energy.com', verified: true, apiKeyHash: `seed-key-duke-${id()}`, contactEmail: 'partners@duke-energy.com' },
+    { name: 'ConEdison', type: 'UTILITY' as const, domain: 'coned.com', verified: false, apiKeyHash: `seed-key-coned-${id()}`, contactEmail: 'partners@coned.com' },
+  ];
+
+  for (const p of providerData) {
+    await prisma.attestationProvider.create({ data: p });
+  }
+
   console.log(`Seed complete:`);
   console.log(`  Marcus (Vivid ${marcusTwin.overallScore}) — ${marcusTxs.length} transactions`);
   console.log(`  Sarah  (Vivid ${sarahTwin.overallScore}) — ${sarahTxs.length} transactions`);
   console.log(`  Institution: ${sunrise.name}`);
   console.log(`  Share tokens: Marcus (..0001), Sarah (..0002)`);
+  console.log(`  Attestation Providers: ${providerData.length}`);
 }
 
 main()
