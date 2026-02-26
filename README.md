@@ -478,15 +478,6 @@ Base URL: `/api/v1`
 
 ---
 
-## Contributing
-
-- Branch naming: `feature/...`, `fix/...`
-- Commits: clear, conventional style
-- PRs: link issue, pass lint and typecheck
-- Code style: ESLint + Prettier (see `.eslintrc.json`, `.prettierrc`)
-
----
-
 ## Team
 
 Manny Serrano and Kevin Benitez, Duke University '27
