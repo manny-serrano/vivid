@@ -35,7 +35,7 @@
 
 ---
 
-## Our Solution
+## Our Solution (Click the thumbnail below to see Vivid in action.)
 
 [![Vivid Demo](https://img.youtube.com/vi/DR45lOBwHYo/maxresdefault.jpg)](https://youtu.be/DR45lOBwHYo?si=KgOvl4ISPY_oDqIh)
 
