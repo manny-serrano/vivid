@@ -37,6 +37,8 @@
 
 ## Our Solution
 
+[![Vivid Demo](https://img.youtube.com/vi/DR45lOBwHYo/maxresdefault.jpg)](https://youtu.be/DR45lOBwHYo?si=KgOvl4ISPY_oDqIh)
+
 **Vivid** builds a **Financial Digital Twin** — a living, AI-powered replica of a person's complete financial identity:
 
 1. **Connect** bank account via Plaid (sandbox for demo).
